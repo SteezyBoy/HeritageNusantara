@@ -2,193 +2,27 @@
 <html lang="id" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Heritage Nusantara - Premium Indonesian Cuisine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heritage Nusantara</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="success-popup" class="success-popup">
-    <div class="popup-content">
-        <div class="checkmark">✓</div>
-        <p>Successfully added to cart!</p>
-    </div>
-</div>
-
-<div id="quickAddModal" class="quick-add-modal">
-    <div class="quick-add-content">
-        <span class="close-quick" onclick="closeQuickAddModal()">&times;</span>
-        <h3>➕ Add to Cart</h3>
-        <p id="quickAddItemName"></p>
-        <div class="quantity-wrapper">
-            <button onclick="decreaseQuickQty()">-</button>
-            <span id="quickQty">1</span>
-            <button onclick="increaseQuickQty()">+</button>
-        </div>
-        <textarea id="quickNotes" placeholder="Special request notes (optional)..."></textarea>
-        <button class="order-btn" onclick="confirmQuickAdd()">Add To Cart</button>
-    </div>
-</div>
-
 <div class="app">
     <header>
         <div class="header-top">
-            <div class="logo">
-                <h1>Heritage Nusantara</h1>
-                <p>Authentic Indonesian Cuisine</p>
-            </div>
+            <div class="logo"><h1>Heritage Nusantara</h1></div>
             <div class="header-actions">
-                <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon">🌙</button>
-                <div class="cart-icon" id="cartIconBtn" onclick="openCart()">
-                    🛒 <span id="cart-count">0</span>
-                </div>
+                <button onclick="toggleTheme()" id="theme-icon">🌙</button>
+                <div class="cart-icon" id="cartIconBtn" onclick="openCart()">🛒</div>
             </div>
         </div>
-        
         <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search menu..." onkeyup="searchMenu()">
-            <button onclick="searchMenu()">🔍</button>
+            <input type="text" id="searchInput" placeholder="Search...">
         </div>
-        
-        <div class="categories">
-            <button class="category-btn active" onclick="changeCategory(this, 'all')">All Menu</button>
-            <button class="category-btn" onclick="changeCategory(this, 'makanan')">Makanan</button>
-            <button class="category-btn" onclick="changeCategory(this, 'minuman')">Minuman</button>
-            <button class="category-btn" onclick="changeCategory(this, 'dessert')">Dessert</button>
-        </div>
-        
-        <div class="sort-wrapper">
-            <select id="sortMenu" onchange="sortMenu()">
-                <option value="default">Sort by...</option>
-                <option value="az">Name: A to Z</option>
-                <option value="za">Name: Z to A</option>
-                <option value="low">Price: Low to High</option>
-                <option value="high">Price: High to Low</option>
-            </select>
-        </div>
-    </header>
+        </header>
 
     <div class="menu-grid" id="menu-list"></div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div class="modal-scrollable">
-                <img id="modal-image" src="" alt="Menu Image">
-                <div class="modal-info">
-                    <div class="food-tag" id="modal-category">Category</div>
-                    <h2 id="modal-name">Menu Name</h2>
-                    <div class="price" id="modal-price">Rp 0</div>
-                    <p id="modal-desc" class="modal-desc">Description</p>
-                    
-                    <div class="quantity-wrapper" style="margin-top:20px; justify-content:center;">
-                        <button onclick="decreaseModalQty()">-</button>
-                        <span id="modal-qty">1</span>
-                        <button onclick="increaseModalQty()">+</button>
-                    </div>
-                    <textarea id="modal-notes" placeholder="Special request (optional)..." style="width:100%; margin-top:15px; padding:10px; border-radius:8px; border:1px solid var(--border); font-family:inherit;"></textarea>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="share-btn" onclick="shareItem()">📤 Share</button>
-                <button class="modal-add-btn" onclick="addToCartFromModal()">Add To Cart</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="cartModal" class="cart-modal">
-        <div class="cart-content">
-            <span class="close-cart" onclick="closeCart()">&times;</span>
-            
-            <div id="cart-screen">
-                <h2>🛒 Your Cart</h2>
-                <button class="clear-cart-btn" onclick="clearCart()">🗑️ Clear Cart</button>
-                <div id="cart-empty-state" class="cart-empty">Cart is empty</div>
-                <div id="cart-items"></div>
-                <div class="cart-footer">
-                    <div class="cart-total-row">
-                        <span>Total:</span>
-                        <span id="cart-total">Rp 0</span>
-                    </div>
-                    <button class="checkout-btn" onclick="openOrderSummary()">Checkout ➔</button>
-                </div>
-            </div>
-
-            <div id="order-summary-screen" style="display:none;">
-                <div class="back-nav" onclick="backToCart()">⬅ Back to Cart</div>
-                <h2>📋 Order Summary</h2>
-                <div class="order-time" id="order-time-display"></div>
-                
-                <div class="input-group" style="margin:20px 0;">
-                    <label>Table Number:</label>
-                    <input type="text" id="tableNumber" placeholder="e.g. T-01, VIP-2, or Takeaway" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); font-size:16px;">
-                </div>
-
-                <div id="order-summary-items" class="summary-list"></div>
-                
-                <div class="cart-total-row" style="margin-top:20px; padding-top:15px; border-top:2px dashed var(--border);">
-                    <span>Grand Total:</span>
-                    <span id="order-summary-grand-total">Rp 0</span>
-                </div>
-                <button class="checkout-btn" onclick="openPayment()" style="margin-top:20px;">Proceed to Payment ➔</button>
-            </div>
-
-            <div id="payment-screen" style="display:none;">
-                <div class="back-nav" onclick="backToSummary()">⬅ Back to Summary</div>
-                <h2>💳 Payment</h2>
-                
-                <div class="payment-info-box">
-                    <p id="payTableInfo"></p>
-                    <p id="payTimeInfo"></p>
-                    <p id="payTotalInfo" style="font-size:18px; color:var(--accent); margin-top:10px;"></p>
-                </div>
-
-                <div class="qris-box">
-                    <h3>Scan QRIS</h3>
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg" alt="QRIS" style="width:150px; margin:15px auto; display:block;">
-                    <p>A.n Heritage Nusantara</p>
-                </div>
-
-                <div style="margin-top:20px;">
-                    <button class="checkout-btn" onclick="confirmPayment()" style="background: linear-gradient(105deg, var(--green), var(--green2));">✅ Sudah Bayar</button>
-                </div>
-            </div>
-
-            <div id="payment-confirm-screen" style="display:none;">
-                <h2>⏳ Konfirmasi Pembayaran</h2>
-                <div class="payment-info-box">
-                    <div id="confirm-status" style="text-align:center; padding:20px;">Memproses...</div>
-                </div>
-                <div style="text-align:center; margin-top:20px;">
-                    <div class="loader" style="border:4px solid var(--border); border-top:4px solid var(--accent); border-radius:50%; width:40px; height:40px; animation:spin 1s linear infinite; margin:0 auto;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="bill-fab" onclick="openBillModal()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-        <line x1="16" y1="13" x2="8" y2="13"></line>
-        <line x1="16" y1="17" x2="8" y2="17"></line>
-        <polyline points="10 9 9 9 8 9"></polyline>
-    </svg>
-</div>
-
-<div id="billModal" class="quick-add-modal">
-    <div class="quick-add-content" style="max-width: 400px; text-align: center;">
-        <span class="close-quick" onclick="closeBillModal()">&times;</span>
-        <h3 style="margin-bottom: 15px; color: var(--text-primary);">🧾 Lacak Pesanan</h3>
-        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Masukkan ID Pesanan untuk melihat status terbaru.</p>
-        
-        <input type="text" id="billOrderId" placeholder="Contoh: ORD-12345" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; font-family: 'Poppins', sans-serif; background: var(--surface2); color: var(--text-primary); box-sizing: border-box;">
-        
-        <button class="order-btn" onclick="checkBillStatus()">Cek Status</button>
-        
-        <div id="billResult" style="margin-top: 20px; text-align: left; display: none; padding: 15px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border);"></div>
-    </div>
 </div>
 
 <script src="js/api.js"></script>
@@ -196,6 +30,5 @@
 <script src="js/customer.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/bill-monitor.js"></script>
-
 </body>
 </html>
