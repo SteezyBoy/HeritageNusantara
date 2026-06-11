@@ -11,19 +11,33 @@
 <div class="app">
     <header>
         <div class="header-top">
-            <div class="logo"><h1>Heritage Nusantara</h1></div>
+            <div class="logo">
+                <h1>Heritage Nusantara</h1>
+                <p>Authentic Indonesian Cuisine</p>
+            </div>
             <div class="header-actions">
-                <button onclick="toggleTheme()" id="theme-icon">🌙</button>
-                <div class="cart-icon" id="cartIconBtn" onclick="openCart()">🛒</div>
+                <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon">🌙</button>
+                <div class="cart-icon" id="cartIconBtn" onclick="openCart()">🛒 <span id="cart-count">0</span></div>
             </div>
         </div>
         <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search...">
+            <input type="text" id="searchInput" placeholder="Search menu..." onkeyup="searchMenu()">
         </div>
-        </header>
+        <div class="categories">
+            <button class="category-btn active" onclick="changeCategory(this, 'all')">All</button>
+            <button class="category-btn" onclick="changeCategory(this, 'makanan')">Makanan</button>
+            <button class="category-btn" onclick="changeCategory(this, 'minuman')">Minuman</button>
+            <button class="category-btn" onclick="changeCategory(this, 'dessert')">Dessert</button>
+        </div>
+    </header>
 
     <div class="menu-grid" id="menu-list"></div>
 </div>
+
+<div id="modal" class="modal"><div class="modal-content"><span class="close" onclick="closeModal()">&times;</span><div class="modal-scrollable"><img id="modal-image"><div class="modal-info"><h2 id="modal-name"></h2><p id="modal-desc"></p><div class="price" id="modal-price"></div></div></div><button class="modal-add-btn" onclick="addToCartFromModal()">Add To Cart</button></div></div>
+
+<div id="cartModal" class="cart-modal">...</div>
+<div id="billModal" class="quick-add-modal">...</div>
 
 <script src="js/api.js"></script>
 <script src="js/utils.js"></script>
