@@ -1,41 +1,11 @@
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
-<header>
-    <div class="header-top">
-        <div class="logo">
-            <h1>Heritage Nusantara</h1>
-            <p>Authentic Indonesian Cuisine</p>
-        </div>
-        <div class="header-actions">
-            <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon">🌙</button>
-            <div class="cart-icon" id="cartIconBtn" onclick="openCart()">
-                🛒 <span id="cart-count">0</span>
-            </div>
-        </div>
-    </div>
-    
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search menu..." onkeyup="searchMenu()">
-        <button onclick="searchMenu()">🔍</button>
-    </div>
-    
-    <div class="categories">
-        <button class="category-btn active" onclick="changeCategory(this, 'all')">All Menu</button>
-        <button class="category-btn" onclick="changeCategory(this, 'makanan')">Makanan</button>
-        <button class="category-btn" onclick="changeCategory(this, 'minuman')">Minuman</button>
-        <button class="category-btn" onclick="changeCategory(this, 'dessert')">Dessert</button>
-    </div>
-    
-    <div class="sort-wrapper">
-        <select id="sortMenu" onchange="sortMenu()">
-            <option value="default">Sort by...</option>
-            <option value="az">Name: A to Z</option>
-            <option value="za">Name: Z to A</option>
-            <option value="low">Price: Low to High</option>
-            <option value="high">Price: High to Low</option>
-        </select>
-    </div>
-</header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Heritage Nusantara - Premium Indonesian Cuisine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
 <body>
 
 <div id="success-popup" class="success-popup">
