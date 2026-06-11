@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Heritage Nusantara</title>
+<style>
+/* ===== CSS VARIABLES (sama seperti sebelumnya, ditambahkan sedikit) ===== */
+:root {
+    --bg:#f4f7fb; --surface:#fff; --surface2:#f8fafc;
+    --border:#e2e8f0; --text:#1e293b; --text2:#334155; --muted:#64748b;
+    --accent:#ff5400; --accent2:#ff7b00;
+    --green:#10b981; --green2:#059669;
+    --red:#ef4444; --yellow:#f59e0b;
+    --shadow:0 4px 20px rgba(0,0,0,.08);
+    --radius:16px; --transition:.25s ease;
+}
+[data-theme="dark"] {
+    --bg:#0f172a; --surface:#1e293b; --surface2:#0f172a;
+    --border:#334155; --text:#f1f5f9; --text2:#e2e8f0; --muted:#94a3b8;
+    --shadow:0 4px 20px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
+
+/* ===== LOGIN ===== */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:var(--surface);border-radius:28px;padding:40px 32px;width:100%;max-width:380px;box-shadow:var(--shadow);text-align:center;}
+.login-logo{font-size:48px;margin-bottom:12px;}
+.login-box h1{font-size:22px;color:var(--text);margin-bottom:4px;}
+.login-box p{color:var(--muted);font-size:14px;margin-bottom:28px;}
+.login-box input{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;background:var(--surface2);color:var(--text);outline:none;margin-bottom:12px;transition:var(--transition);}
+.login-box input:focus{border-color:var(--accent);}
+.login-btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#ff7b00,#ff5400);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:var(--transition);}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,84,0,.3);}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+/* ===== ADMIN LAYOUT ===== */
+.admin-wrap{display:none;max-width:1000px;margin:0 auto;padding:20px;}
+
+/* ===== TOPBAR ===== */
+.topbar{background:linear-gradient(135deg,#ff7b00,#ff5400);color:#fff;padding:16px 20px;border-radius:var(--radius);display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;box-shadow:0 8px 25px rgba(255,84,0,.3);}
+.topbar-left h2{font-size:18px;font-weight:700;}
+.topbar-left p{font-size:12px;opacity:.85;margin-top:2px;}
+.topbar-right{display:flex;gap:10px;align-items:center;}
+.topbar-btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);}
+.topbar-btn:hover{background:rgba(255,255,255,.3);}
+
+/* ===== STATS CARDS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);}
+.stat-card .icon{font-size:28px;margin-bottom:8px;}
+.stat-card .value{font-size:22px;font-weight:800;color:var(--text);margin-bottom:2px;}
+.stat-card .label{font-size:12px;color:var(--muted);}
+.stat-card.accent .value{color:var(--accent);}
+.stat-card.green .value{color:var(--green);}
+
+/* ===== TAB NAV ===== */
+.tab-nav{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;}
+.tab-nav::-webkit-scrollbar{display:none;}
+.tab-btn{border:none;padding:12px 20px;border-radius:50px;background:var(--surface);color:var(--muted);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap;transition:var(--transition);box-shadow:var(--shadow);}
+.tab-btn.active{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;}
+.tab-btn:hover:not(.active){background:var(--border);}
+
+/* ===== PANEL ===== */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* ===== ORDER CARDS ===== */
+.order-filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.filter-btn{border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);padding:7px 14px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);}
+.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.order-card{background:var(--surface);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid var(--border);}
+.order-card.status-baru{border-left-color:var(--accent);}
+.order-card.status-diproses{border-left-color:var(--yellow);}
+.order-card.status-selesai{border-left-color:var(--green);}
+.order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.order-id{font-weight:700;font-size:14px;color:var(--text);}
+.order-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.order-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+.badge-baru{background:#fff3e0;color:#e65100;}
+.badge-diproses{background:#fef9c3;color:#92400e;}
+.badge-selesai{background:#dcfce7;color:#166534;}
+.order-items{border-top:1px solid var(--border);margin-top:10px;padding-top:10px;}
+.order-item-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--text2);}
+.order-item-row .note{color:var(--muted);font-style:italic;font-size:12px;}
+.order-total-row{display:flex;justify-content:space-between;font-weight:700;font-size:15px;border-top:1px dashed var(--border);margin-top:8px;padding-top:8px;color:var(--text);}
+.order-total-row span:last-child{color:var(--accent);}
+.order-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.action-btn{border:none;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);}
+.btn-proses{background:#fef9c3;color:#92400e;}
+.btn-proses:hover{background:#fde68a;}
+.btn-selesai{background:#dcfce7;color:#166534;}
+.btn-selesai:hover{background:#bbf7d0;}
+.btn-hapus{background:#fee2e2;color:#dc2626;}
+.btn-hapus:hover{background:#fca5a5;}
+
+/* ===== MENU MANAGER ===== */
+.menu-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.menu-toolbar h3{font-size:16px;font-weight:700;color:var(--text);}
+.add-menu-btn{border:none;padding:10px 18px;border-radius:12px;background:linear-gradient(135deg,#ff7b00,#ff5400);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition);}
+.add-menu-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(255,84,0,.3);}
+
+.menu-item-row{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;}
+.menu-item-row img{width:60px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--surface2);}
+.menu-item-info{flex:1;min-width:0;}
+.menu-item-info strong{display:block;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.menu-item-info span{font-size:13px;color:var(--accent);font-weight:600;}
+.menu-item-info small{display:block;font-size:11px;color:var(--muted);}
+.menu-item-btns{display:flex;gap:6px;flex-shrink:0;}
+.edit-btn{background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;transition:var(--transition);}
+.edit-btn:hover{border-color:var(--accent);color:var(--accent);}
+.del-btn{background:#fee2e2;border:none;color:#dc2626;padding:6px 10px;border-radius:8px;font-size:13px;cursor:pointer;transition:var(--transition);}
+.del-btn:hover{background:#fca5a5;}
+
+/* ===== MODAL FORM ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:999;justify-content:center;align-items:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:24px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 50px rgba(0,0,0,.3);animation:fadeUp .3s ease;}
+.modal-box h3{font-size:18px;font-weight:700;margin-bottom:20px;color:var(--text);}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;background:var(--surface2);color:var(--text);outline:none;transition:var(--transition);font-family:inherit;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+.form-group textarea{min-height:80px;resize:vertical;}
+.form-row{display:flex;gap:10px;}
+.form-row .form-group{flex:1;}
+.form-check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text2);cursor:pointer;}
+.form-check input{width:18px;height:18px;cursor:pointer;}
+.modal-btns{display:flex;gap:10px;margin-top:20px;}
+.modal-save{flex:1;border:none;padding:14px;border-radius:12px;background:linear-gradient(135deg,#ff7b00,#ff5400);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:var(--transition);}
+.modal-save:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(255,84,0,.3);}
+.modal-cancel{flex:0 0 auto;border:1.5px solid var(--border);padding:14px 18px;border-radius:12px;background:transparent;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;transition:var(--transition);}
+.modal-cancel:hover{background:var(--border);}
+
+/* ===== TOP ITEMS ===== */
+.top-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.top-item:last-child{border-bottom:none;}
+.top-item-name{font-size:14px;font-weight:600;color:var(--text);}
+.top-item-qty{font-size:13px;color:var(--accent);font-weight:700;}
+
+/* ===== LOADING / EMPTY ===== */
+.loading-spin{text-align:center;padding:40px;color:var(--muted);}
+.loading-spin::after{content:"";display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-top:10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty-msg{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-msg .em-icon{font-size:48px;margin-bottom:12px;}
+
+/* ===== NOTIFICATION BADGE ===== */
+.notif-dot{display:inline-block;background:var(--red);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-left:4px;vertical-align:middle;}
+
+/* ===== REFRESH BTN ===== */
+.refresh-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.refresh-btn{border:1.5px solid var(--border);background:var(--surface);color:var(--muted);padding:8px 14px;border-radius:10px;font-size:13px;cursor:pointer;transition:var(--transition);}
+.refresh-btn:hover{border-color:var(--accent);color:var(--accent);}
+.auto-refresh-label{font-size:12px;color:var(--muted);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="login-wrap" id="loginWrap">
+    <div class="login-box">
+        <div class="login-logo">🍃</div>
+        <h1>Heritage Nusantara</h1>
+        <p>Admin Panel — Masuk untuk melanjutkan</p>
+        <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
+        <input type="password" id="loginPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="login-btn" onclick="doLogin()">Masuk →</button>
+        <div class="login-error" id="loginError">❌ Username atau password salah</div>
+        <p style="font-size:12px;color:var(--muted);margin-top:16px;">Default: admin / heritage2026</p>
+    </div>
+</div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div class="admin-wrap" id="adminWrap">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <h2>🍃 Heritage Nusantara</h2>
+            <p id="adminGreet">Admin Panel</p>
+        </div>
+        <div class="topbar-right">
+            <button class="topbar-btn" onclick="toggleAdminDark()">🌙</button>
+            <button class="topbar-btn" onclick="doLogout()">Keluar</button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card accent">
+            <div class="icon">📋</div>
+            <div class="value" id="statTotalOrders">—</div>
+            <div class="label">Total Pesanan Selesai</div>
+        </div>
+        <div class="stat-card green">
+            <div class="icon">💰</div>
+            <div class="value" id="statTotalRevenue">—</div>
+            <div class="label">Total Pendapatan</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon">🌅</div>
+            <div class="value" id="statTodayOrders">—</div>
+            <div class="label">Pesanan Hari Ini</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon">📈</div>
+            <div class="value" id="statTodayRevenue">—</div>
+            <div class="label">Revenue Hari Ini</div>
+        </div>
+    </div>
+
+    <!-- Tab Nav -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('orders',this)">
+            📋 Pesanan Baru <span class="notif-dot" id="newOrderBadge" style="display:none">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('menu',this)">🍽 Kelola Menu</button>
+        <button class="tab-btn" onclick="switchTab('stats',this)">📊 Statistik</button>
+        <button class="tab-btn" onclick="switchTab('history',this)">📜 History</button>
+        <button class="tab-btn" onclick="switchTab('setup',this)">⚙️ Setup</button>
+    </div>
+
+    <!-- ===== PANEL: ORDERS ===== -->
+    <div class="panel active" id="panel-orders">
+        <div class="refresh-row">
+            <div class="order-filters">
+                <button class="filter-btn active" onclick="filterOrders('semua',this)">Semua</button>
+                <button class="filter-btn" onclick="filterOrders('Baru',this)">🔴 Baru</button>
+                <button class="filter-btn" onclick="filterOrders('Diproses',this)">🟡 Diproses</button>
+                <button class="filter-btn" onclick="filterOrders('Selesai',this)">🟢 Selesai</button>
+            </div>
+            <button class="refresh-btn" onclick="loadOrders()">🔄 Refresh</button>
+        </div>
+        <div id="orders-list"><div class="loading-spin"></div></div>
+        <div style="text-align:center;margin-top:8px;">
+            <span class="auto-refresh-label" id="lastRefreshTime"></span>
+        </div>
+    </div>
+
+    <!-- ===== PANEL: MENU ===== -->
+    <div class="panel" id="panel-menu">
+        <div class="menu-toolbar">
+            <h3>Daftar Menu (<span id="menuCount">0</span>)</h3>
+            <button class="add-menu-btn" onclick="openAddMenu()">+ Tambah Menu</button>
+        </div>
+        <div id="menu-list-admin"><div class="loading-spin"></div></div>
+    </div>
+
+    <!-- ===== PANEL: STATS ===== -->
+    <div class="panel" id="panel-stats">
+        <div class="stat-card" style="margin-bottom:14px;">
+            <div class="icon">🏆</div>
+            <strong style="display:block;margin-bottom:12px;color:var(--text);">Menu Terlaris</strong>
+            <div id="topItemsList"><div style="color:var(--muted);font-size:14px;">Memuat data...</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="icon">📅</div>
+            <strong style="display:block;margin-bottom:12px;color:var(--text);">Ringkasan</strong>
+            <div id="statsSummary" style="font-size:14px;color:var(--muted);">Memuat...</div>
+        </div>
+    </div>
+
+    <!-- ===== PANEL: HISTORY ===== -->
+    <div class="panel" id="panel-history">
+        <div class="refresh-row">
+            <div class="order-filters" style="flex-wrap:wrap;">
+                <label style="display:flex; align-items:center; gap:6px;">Filter Tanggal:
+                    <input type="date" id="historyDateFilter" onchange="loadHistoryOrders()">
+                </label>
+                <label style="display:flex; align-items:center; gap:6px;">Bulan:
+                    <input type="month" id="historyMonthFilter" onchange="loadHistoryOrders()">
+                </label>
+                <label style="display:flex; align-items:center; gap:6px;">Tahun:
+                    <input type="number" id="historyYearFilter" placeholder="2025" step="1" onchange="loadHistoryOrders()">
+                </label>
+                <button class="refresh-btn" onclick="loadHistoryOrders()">Tampilkan</button>
+                <button class="refresh-btn" onclick="resetHistoryFilters()">Reset</button>
+            </div>
+        </div>
+        <div id="history-list"><div class="loading-spin"></div></div>
+    </div>
+
+    <!-- ===== PANEL: SETUP ===== -->
+    <div class="panel" id="panel-setup">
+        <div class="stat-card" style="margin-bottom:14px;">
+            <h3 style="margin-bottom:16px;color:var(--text);">⚙️ Konfigurasi Apps Script</h3>
+            <div class="form-group">
+                <label>URL Google Apps Script</label>
+                <input type="text" id="setupUrl" placeholder="https://script.google.com/macros/s/...">
+            </div>
+            <button class="add-menu-btn" onclick="saveSetup()">💾 Simpan URL</button>
+            <div id="setupStatus" style="margin-top:10px;font-size:13px;"></div>
+        </div>
+        <div class="stat-card">
+            <h3 style="margin-bottom:16px;color:var(--text);">🔐 Ganti Password</h3>
+            <div class="form-group">
+                <label>Password Baru</label>
+                <input type="password" id="newPass" placeholder="Password baru">
+            </div>
+            <div class="form-group">
+                <label>Konfirmasi Password</label>
+                <input type="password" id="confirmPass" placeholder="Ulangi password">
+            </div>
+            <button class="add-menu-btn" onclick="changePassword()">🔐 Ganti Password</button>
+            <div id="passStatus" style="margin-top:10px;font-size:13px;"></div>
+        </div>
+    </div>
+
+</div><!-- end admin-wrap -->
+
+<!-- ===== MODAL FORM MENU ===== -->
+<div class="modal-overlay" id="menuModal">
+    <div class="modal-box">
+        <h3 id="menuModalTitle">➕ Tambah Menu</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nama Menu</label>
+                <input type="text" id="fName" placeholder="Nama hidangan">
+            </div>
+            <div class="form-group">
+                <label>Harga (Rp)</label>
+                <input type="number" id="fPrice" placeholder="50000">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Kategori</label>
+                <select id="fCategory">
+                    <option value="makanan">🍛 Makanan</option>
+                    <option value="minuman">🥤 Minuman</option>
+                    <option value="dessert">🍨 Dessert</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sub-kategori</label>
+                <input type="text" id="fSubcat" placeholder="Appetizer / Soup / dll">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Deskripsi</label>
+            <textarea id="fDesc" placeholder="Deskripsi menu..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Path Gambar</label>
+            <input type="text" id="fImage" placeholder="images/nama-file.jpeg">
+        </div>
+        <div class="form-row">
+            <label class="form-check" style="flex:1;">
+                <input type="checkbox" id="fBestSeller"> Best Seller 🔥
+            </label>
+            <label class="form-check" style="flex:1;">
+                <input type="checkbox" id="fOutOfStock"> ⛔ Habis (Out of Stock)
+            </label>
+        </div>
+        <div class="modal-btns">
+            <button class="modal-cancel" onclick="closeMenuModal()">Batal</button>
+            <button class="modal-save" onclick="saveMenuItem()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== KONFIGURASI ====================
+let SCRIPT_URL = localStorage.getItem("hn_admin_url") || "";
+let currentOrders = [];
+let currentFilter = "semua";
+let editingMenuItem = null;
+let adminDark = localStorage.getItem("hn_admin_dark") === "true";
+let autoRefreshTimer = null;
+let allHistoryOrders = [];
+
+// Data menu yang akan disinkronkan dengan Sheets
+let adminMenuData = { makanan: [], minuman: [], dessert: [] };
+
+// ==================== INIT ====================
+document.addEventListener("DOMContentLoaded", () => {
+    applyAdminDark();
+    if (localStorage.getItem("hn_admin_session") === "ok") showAdmin();
+    if (SCRIPT_URL) document.getElementById("setupUrl").value = SCRIPT_URL;
+});
+
+// ==================== LOGIN ====================
+function doLogin() {
+    const user = document.getElementById("loginUser").value.trim();
+    const pass = document.getElementById("loginPass").value;
+    const storedPass = localStorage.getItem("hn_admin_pass") || "heritage2026";
+    if (user === "admin" && pass === storedPass) {
+        localStorage.setItem("hn_admin_session", "ok");
+        showAdmin();
+    } else {
+        document.getElementById("loginError").style.display = "block";
+        setTimeout(() => document.getElementById("loginError").style.display = "none", 3000);
+    }
+}
+function doLogout() {
+    localStorage.removeItem("hn_admin_session");
+    clearInterval(autoRefreshTimer);
+    document.getElementById("adminWrap").style.display = "none";
+    document.getElementById("loginWrap").style.display = "flex";
+    document.getElementById("loginPass").value = "";
+}
+async function showAdmin() {
+    document.getElementById("loginWrap").style.display = "none";
+    document.getElementById("adminWrap").style.display = "block";
+    const now = new Date();
+    document.getElementById("adminGreet").textContent =
+        `Selamat ${now.getHours()<12?"Pagi":now.getHours()<17?"Siang":"Malam"}, Admin 👋`;
+    await loadMenuFromSheet();
+    loadOrders();
+    loadStats();
+    loadHistoryOrders();
+    renderAdminMenu();
+    autoRefreshTimer = setInterval(() => {
+        loadOrders(true);
+        loadStats();
+    }, 30000);
+}
+
+// ==================== DARK MODE ====================
+function toggleAdminDark() {
+    adminDark = !adminDark;
+    localStorage.setItem("hn_admin_dark", adminDark);
+    applyAdminDark();
+}
+function applyAdminDark() {
+    document.documentElement.setAttribute("data-theme", adminDark ? "dark" : "light");
+}
+
+// ==================== TABS ====================
+function switchTab(name, btn) {
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("panel-"+name).classList.add("active");
+    btn.classList.add("active");
+    if (name === "menu") renderAdminMenu();
+    if (name === "stats") loadStats();
+    if (name === "history") loadHistoryOrders();
+}
+
+// ==================== FORMAT ====================
+function fmt(price) { return "Rp " + Number(price).toLocaleString("id-ID"); }
+
+// ==================== LOAD ORDERS ====================
+async function loadOrders(silent = false) {
+    if (!silent) document.getElementById("orders-list").innerHTML = '<div class="loading-spin"></div>';
+    if (!SCRIPT_URL) {
+        document.getElementById("orders-list").innerHTML =
+            '<div class="empty-msg"><div class="em-icon">⚙️</div><p>Masukkan URL Apps Script di tab <strong>Setup</strong> dulu</p></div>';
+        return;
+    }
+    try {
+        const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
+        const data = await res.json();
+        currentOrders = data.orders || [];
+        const newCount = currentOrders.filter(o => o.status === "Baru").length;
+        const badge = document.getElementById("newOrderBadge");
+        if (newCount > 0) { badge.style.display = "inline-block"; badge.textContent = newCount; }
+        else { badge.style.display = "none"; }
+        renderOrders();
+        document.getElementById("lastRefreshTime").textContent =
+            "Terakhir diperbarui: " + new Date().toLocaleTimeString("id-ID");
+    } catch(e) {
+        if (!silent)
+            document.getElementById("orders-list").innerHTML =
+                '<div class="empty-msg"><div class="em-icon">❌</div><p>Gagal memuat pesanan. Periksa URL Apps Script.</p></div>';
+    }
+}
+
+function filterOrders(status, btn) {
+    currentFilter = status;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderOrders();
+}
+
+function renderOrders() {
+    const list = document.getElementById("orders-list");
+    const filtered = currentFilter === "semua"
+        ? currentOrders
+        : currentOrders.filter(o => o.status === currentFilter);
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="empty-msg"><div class="em-icon">📋</div><p>Tidak ada pesanan</p></div>';
+        return;
+    }
+    list.innerHTML = filtered.map(order => {
+        const statusClass = (order.status || "Baru").toLowerCase().replace(/ /g,"");
+        const badgeClass  = "badge-" + statusClass;
+        const itemsHtml = (order.items || []).map(it => `
+            <div class="order-item-row" style="flex-direction: column; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                    <span><strong>${it.qty}× ${it.name}</strong> ${it.notes && it.notes!=="-" ? `<br><em class="note" style="font-size:11px; color:var(--accent);">Catatan: ${it.notes}</em>` : ""}</span>
+                    <span style="font-weight: 700; color: var(--text);">${fmt(it.subtotal)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; background: var(--surface2); padding: 6px 10px; border-radius: 8px;">
+                    <span style="font-size: 12px; color: var(--muted);">Status: <strong style="color: ${it.status === 'Selesai' ? 'var(--green)' : (it.status === 'Diproses' ? 'var(--accent)' : 'var(--text)')}">${it.status || 'Baru'}</strong></span>
+                    <select onchange="updateSingleItemStatus('${order.id}', '${it.name}', this.value)" style="font-size:12px; padding:4px 8px; border-radius:6px; border:1px solid var(--border); background:var(--surface); cursor:pointer; font-weight:600; color:var(--text); outline:none;">
+                        <option value="Baru" ${it.status === 'Baru' ? 'selected' : ''}>Baru</option>
+                        <option value="Diproses" ${it.status === 'Diproses' ? 'selected' : ''}>Diproses</option>
+                        <option value="Selesai" ${it.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                    </select>
+                </div>
+            </div>`).join("");
+        return `
+        <div class="order-card status-${statusClass}">
+            <div class="order-header">
+                <div>
+                    <div class="order-id">${order.id}</div>
+                    <div class="order-meta">🪑 Meja: ${order.table || "-"} &nbsp;•&nbsp; 🕐 ${order.time}</div>
+                </div>
+                <span class="order-badge ${badgeClass}">${order.status || "Baru"}</span>
+            </div>
+            <div class="order-items">
+                ${itemsHtml}
+                <div class="order-total-row"><span>Total</span><span>${fmt(order.total)}</span></div>
+            </div>
+            <div class="order-actions">
+                <button class="action-btn btn-proses" onclick="updateStatus('${order.id}','Diproses')">🍳 Diproses</button>
+                <button class="action-btn btn-selesai" onclick="updateStatus('${order.id}','Selesai')">✅ Selesai</button>
+                <button class="action-btn btn-hapus"  onclick="deleteOrder('${order.id}')">🗑 Hapus</button>
+            </div>
+        </div>`;
+    }).join("");
+}
+
+async function updateStatus(orderId, newStatus) {
+    if (!SCRIPT_URL) { alert("Set URL Apps Script dulu di tab Setup!"); return; }
+    try {
+        await fetch(SCRIPT_URL, {
+            method:"POST", headers:{"Content-Type":"text/plain"},
+            body: JSON.stringify({ action:"updateStatus", orderId, newStatus })
+        });
+        const o = currentOrders.find(x => x.id === orderId);
+        if (o) o.status = newStatus;
+        renderOrders(); loadStats(); loadHistoryOrders();
+    } catch(e) { alert("Gagal update status: " + e.message); }
+}
+
+function deleteOrder(orderId) {
+    if (!confirm(`Hapus pesanan ${orderId}?`)) return;
+    currentOrders = currentOrders.filter(o => o.id !== orderId);
+    renderOrders();
+}
+
+// ==================== STATS ====================
+async function loadStats() {
+    if (!SCRIPT_URL) return;
+    try {
+        const res = await fetch(`${SCRIPT_URL}?action=getStats`);
+        const data = await res.json();
+        const s = data.stats || {};
+        document.getElementById("statTotalOrders").textContent  = s.totalOrders  || 0;
+        document.getElementById("statTotalRevenue").textContent = s.totalRevenue ? fmt(s.totalRevenue) : "Rp 0";
+        document.getElementById("statTodayOrders").textContent  = s.todayOrders  || 0;
+        document.getElementById("statTodayRevenue").textContent = s.todayRevenue ? fmt(s.todayRevenue) : "Rp 0";
+        const topHtml = (s.topItems || []).map((it,i) => `
+            <div class="top-item">
+                <span class="top-item-name">${i+1}. ${it.name}</span>
+                <span class="top-item-qty">${it.qty}× terjual</span>
+            </div>`).join("") || '<div style="color:var(--muted);font-size:14px;">Belum ada data</div>';
+        document.getElementById("topItemsList").innerHTML = topHtml;
+        document.getElementById("statsSummary").innerHTML =
+            `Total pesanan selesai: <strong>${s.totalOrders || 0}</strong><br>
+             Pendapatan total: <strong>${s.totalRevenue ? fmt(s.totalRevenue) : "Rp 0"}</strong><br>
+             Pesanan hari ini: <strong>${s.todayOrders || 0}</strong>`;
+    } catch(e) {
+        document.getElementById("statsSummary").textContent = "Gagal memuat statistik.";
+    }
+}
+
+// ==================== HISTORY PESANAN ====================
+async function loadHistoryOrders() {
+    if (!SCRIPT_URL) return;
+    document.getElementById("history-list").innerHTML = '<div class="loading-spin"></div>';
+    try {
+        const res = await fetch(`${SCRIPT_URL}?action=getAllOrders`);
+        const data = await res.json();
+        allHistoryOrders = data.orders || [];
+        applyHistoryFilters();
+    } catch(e) {
+        document.getElementById("history-list").innerHTML = '<div class="empty-msg">Gagal memuat history</div>';
+    }
+}
+
+function applyHistoryFilters() {
+    let filtered = [...allHistoryOrders];
+    const dateFilter = document.getElementById("historyDateFilter").value;
+    const monthFilter = document.getElementById("historyMonthFilter").value;
+    const yearFilter = document.getElementById("historyYearFilter").value;
+    if (dateFilter) {
+        const targetDate = new Date(dateFilter).toLocaleDateString("id-ID");
+        filtered = filtered.filter(o => o.time.split(",")[0] === targetDate);
+    }
+    if (monthFilter) {
+        const [year, month] = monthFilter.split("-");
+        filtered = filtered.filter(o => {
+            const date = new Date(o.time);
+            return date.getFullYear() == year && (date.getMonth()+1) == month;
+        });
+    }
+    if (yearFilter) {
+        filtered = filtered.filter(o => new Date(o.time).getFullYear() == yearFilter);
+    }
+    renderHistory(filtered);
+}
+
+function renderHistory(orders) {
+    const container = document.getElementById("history-list");
+    if (orders.length === 0) {
+        container.innerHTML = '<div class="empty-msg">Tidak ada pesanan</div>';
+        return;
+    }
+    container.innerHTML = orders.map(order => `
+        <div class="order-card">
+            <div class="order-header">
+                <div>
+                    <div class="order-id">${order.id}</div>
+                    <div class="order-meta">🪑 Meja: ${order.table} &nbsp;•&nbsp; 🕐 Masuk: ${order.time}</div>
+                    ${order.completedTime ? `<div class="order-meta">✅ Selesai: ${new Date(order.completedTime).toLocaleString("id-ID")}</div>` : ''}
+                </div>
+                <span class="order-badge badge-${(order.status||'').toLowerCase()}">${order.status}</span>
+            </div>
+            <div class="order-items">
+                ${(order.items || []).map(it => `<div class="order-item-row"><span>${it.qty}× ${it.name}</span><span>${fmt(it.subtotal)}</span></div>`).join('')}
+                <div class="order-total-row"><span>Total</span><span>${fmt(order.total)}</span></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function resetHistoryFilters() {
+    document.getElementById("historyDateFilter").value = "";
+    document.getElementById("historyMonthFilter").value = "";
+    document.getElementById("historyYearFilter").value = "";
+    loadHistoryOrders();
+}
+
+// ==================== MENU MANAGER ====================
+async function loadMenuFromSheet() {
+    if (!SCRIPT_URL) {
+        setDefaultMenu();
+        renderAdminMenu();
+        return;
+    }
+    try {
+        const res = await fetch(`${SCRIPT_URL}?action=getMenu`);
+        const data = await res.json();
+        if (data.menu) {
+            adminMenuData = data.menu;
+            for (let cat in adminMenuData) {
+                adminMenuData[cat] = adminMenuData[cat].map(item => ({
+                    ...item,
+                    price: Number(item.price),
+                    bestSeller: item.bestSeller === true || item.bestSeller === "true",
+                    outOfStock: item.outOfStock === true || item.outOfStock === "true"
+                }));
+            }
+        } else {
+            setDefaultMenu();
+        }
+    } catch (e) {
+        console.warn("Gagal load menu dari Sheets, pakai default", e);
+        setDefaultMenu();
+    }
+    renderAdminMenu();
+}
+
+function setDefaultMenu() {
+    adminMenuData = {
+        makanan: [
+            { name:"Tahu Isi Goreng", category:"Appetizer", bestSeller:true, outOfStock:false, image:"images/TAHU ISI GORENG.jpeg", desc:"Tahu renyah yang digoreng keemasan.", price:35000 },
+            { name:"Lumpia Semarang", category:"Appetizer", bestSeller:false, outOfStock:false, image:"images/LUMPIA SEMARANG.jpeg", desc:"Camilan legendaris khas Semarang.", price:45000 },
+            { name:"Soto Ayam Lamongan", category:"Soup", bestSeller:true, outOfStock:false, image:"images/SOTO AYAM LAMONGAN.jpeg", desc:"Kuah soto kuning kaya rempah.", price:40000 },
+            { name:"Nasi Goreng Kampung", category:"Main Course", bestSeller:true, outOfStock:false, image:"images/NASI GORENG KAMPUNG.jpeg", desc:"Nasi goreng beraroma terasi.", price:75000 },
+            { name:"Rendang Daging Sapi", category:"Main Course", bestSeller:true, outOfStock:false, image:"images/RENDANG DAGING SAPI.jpeg", desc:"Mahakarya kuliner Minang.", price:90000 }
+        ],
+        minuman: [
+            { name:"Es Teh", category:"Beverage", bestSeller:false, outOfStock:false, image:"images/ES TEH.jpeg", desc:"Seduhan teh melati dingin.", price:25000 },
+            { name:"Kopi Bali", category:"Beverage", bestSeller:true, outOfStock:false, image:"images/KOPI BALI.jpeg", desc:"Kopi tubruk dari biji kopi Bali.", price:30000 }
+        ],
+        dessert: [
+            { name:"Klepon", category:"Dessert", bestSeller:true, outOfStock:false, image:"images/KLEPON.jpeg", desc:"Jajanan pasar kenyal bertabur kelapa.", price:30000 }
+        ]
+    };
+}
+
+function getAllAdminItems() {
+    return [
+        ...adminMenuData.makanan.map(i=>({...i, _cat:"makanan"})),
+        ...adminMenuData.minuman.map(i=>({...i, _cat:"minuman"})),
+        ...adminMenuData.dessert.map(i=>({...i, _cat:"dessert"}))
+    ];
+}
+
+function renderAdminMenu() {
+    const all = getAllAdminItems();
+    document.getElementById("menuCount").textContent = all.length;
+    const list = document.getElementById("menu-list-admin");
+    if (all.length === 0) {
+        list.innerHTML = '<div class="empty-msg"><div class="em-icon">🍽</div><p>Belum ada menu</p></div>';
+        return;
+    }
+    list.innerHTML = all.map((item, i) => `
+        <div class="menu-item-row">
+            <img src="${item.image}" alt="${item.name}"
+                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect fill=%22%23f1f5f9%22 width=%2260%22 height=%2260%22/></svg>'">
+            <div class="menu-item-info">
+                <strong>${item.name} ${item.bestSeller?"🔥":""} ${item.outOfStock?"⛔ HABIS":""}</strong>
+                <span>${fmt(item.price)}</span>
+                <small>${item.category} • ${item._cat}</small>
+            </div>
+            <div class="menu-item-btns">
+                <button class="edit-btn" onclick="openEditMenu(${i})">✏️ Edit</button>
+                <button class="del-btn"  onclick="deleteMenuItem(${i})">🗑</button>
+            </div>
+        </div>`).join("");
+}
+
+function openAddMenu() {
+    editingMenuItem = null;
+    document.getElementById("menuModalTitle").textContent = "➕ Tambah Menu";
+    document.getElementById("fName").value = "";
+    document.getElementById("fPrice").value = "";
+    document.getElementById("fDesc").value = "";
+    document.getElementById("fImage").value = "";
+    document.getElementById("fSubcat").value = "";
+    document.getElementById("fBestSeller").checked = false;
+    document.getElementById("fOutOfStock").checked = false;
+    document.getElementById("fCategory").value = "makanan";
+    document.getElementById("menuModal").classList.add("open");
+}
+
+function openEditMenu(globalIndex) {
+    const item = getAllAdminItems()[globalIndex];
+    editingMenuItem = { ...item, _cat: item._cat };
+    document.getElementById("menuModalTitle").textContent = "✏️ Edit Menu";
+    document.getElementById("fName").value   = item.name;
+    document.getElementById("fPrice").value  = item.price;
+    document.getElementById("fDesc").value   = item.desc;
+    document.getElementById("fImage").value  = item.image;
+    document.getElementById("fSubcat").value = item.category;
+    document.getElementById("fBestSeller").checked = item.bestSeller;
+    document.getElementById("fOutOfStock").checked = item.outOfStock === true;
+    document.getElementById("fCategory").value = item._cat;
+    document.getElementById("menuModal").classList.add("open");
+}
+
+function closeMenuModal() {
+    document.getElementById("menuModal").classList.remove("open");
+    editingMenuItem = null;
+}
+
+async function saveMenuItem() {
+    const name   = document.getElementById("fName").value.trim();
+    const price  = parseInt(document.getElementById("fPrice").value);
+    const cat    = document.getElementById("fCategory").value;
+    const subcat = document.getElementById("fSubcat").value.trim() || (cat === "makanan" ? "Main Course" : (cat === "minuman" ? "Beverage" : "Dessert"));
+    const desc   = document.getElementById("fDesc").value.trim();
+    const image  = document.getElementById("fImage").value.trim();
+    const best   = document.getElementById("fBestSeller").checked;
+    const outOfStock = document.getElementById("fOutOfStock").checked;
+    if (!name || !price) { alert("Nama dan harga wajib diisi!"); return; }
+    const newItem = { name, price, category: subcat, desc, image, bestSeller: best, outOfStock };
+    
+    if (editingMenuItem === null) {
+        adminMenuData[cat].push(newItem);
+    } else {
+        const oldCat = editingMenuItem._cat;
+        const idx = adminMenuData[oldCat].findIndex(i => i.name === editingMenuItem.name);
+        if (idx !== -1) adminMenuData[oldCat].splice(idx, 1);
+        adminMenuData[cat].push(newItem);
+    }
+    closeMenuModal();
+    renderAdminMenu();
+    await syncMenuToSheets();
+}
+
+// ==================== DELETE MENU FIX ====================
+async function deleteMenu(category, index) {
+    if(!confirm("Yakin ingin menghapus menu ini secara permanen?")) return;
+    
+    // 1. Hapus dari state lokal terlebih dahulu agar UI terasa sangat cepat
+    currentMenu[category].splice(index, 1);
+    renderAdminMenu(); 
+    
+    // 2. Gabungkan ulang semua kategori untuk sinkronisasi ke Google Sheets
+    let updatedMenu = [];
+    Object.keys(currentMenu).forEach(cat => {
+        updatedMenu = updatedMenu.concat(currentMenu[cat]);
+    });
+    
+    // 3. Tembak ke Backend
+    try {
+        const res = await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "updateMenu", menu: updatedMenu })
+        });
+        const data = await res.json();
+        if (data.status !== "ok") {
+            alert("Gagal sinkronisasi hapus menu ke server.");
+            await loadMenuFromSheet(); // Rollback UI jika gagal di server
+            renderAdminMenu();
+        }
+    } catch (e) {
+        console.error("Delete Error:", e);
+        alert("Error jaringan saat menghapus menu.");
+    }
+}
+
+async function syncMenuToSheets() {
+    if (!SCRIPT_URL) {
+        alert("URL Apps Script belum diset. Menu hanya tersimpan lokal.");
+        return;
+    }
+    try {
+        const allItems = getAllAdminItems().map(i => ({
+            category: i._cat,
+            name: i.name,
+            price: i.price,
+            desc: i.desc,
+            image: i.image,
+            bestSeller: i.bestSeller,
+            outOfStock: i.outOfStock,
+            subcategory: i.category
+        }));
+        const res = await fetch(SCRIPT_URL, {
+            method:"POST", headers:{"Content-Type":"text/plain"},
+            body: JSON.stringify({ action:"updateMenu", menu: allItems })
+        });
+        const result = await res.json();
+        if (result.status === "ok") {
+            showToast("✅ Menu berhasil disimpan ke Google Sheets!");
+        } else {
+            showToast("⚠️ Gagal menyimpan menu ke Sheets", "error");
+        }
+    } catch(e) {
+        console.warn("Gagal sync menu:", e);
+        showToast("❌ Gagal terhubung ke server", "error");
+    }
+}
+
+function showToast(msg, type="success") {
+    const toast = document.createElement("div");
+    toast.textContent = msg;
+    toast.style.position = "fixed";
+    toast.style.bottom = "80px";
+    toast.style.left = "50%";
+    toast.style.transform = "translateX(-50%)";
+    toast.style.backgroundColor = type === "error" ? "#ef4444" : "#10b981";
+    toast.style.color = "white";
+    toast.style.padding = "10px 20px";
+    toast.style.borderRadius = "50px";
+    toast.style.zIndex = "9999";
+    toast.style.fontSize = "14px";
+    toast.style.fontWeight = "bold";
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// ==================== SETUP ====================
+function saveSetup() {
+    const url = document.getElementById("setupUrl").value.trim();
+    SCRIPT_URL = url;
+    localStorage.setItem("hn_admin_url", url);
+    document.getElementById("setupStatus").innerHTML =
+        '<span style="color:var(--green)">✅ URL berhasil disimpan! Memuat ulang data...</span>';
+    setTimeout(async () => {
+        document.getElementById("setupStatus").textContent = "";
+        await loadMenuFromSheet();
+        loadOrders();
+        loadStats();
+        loadHistoryOrders();
+        renderAdminMenu();
+    }, 1500);
+}
+
+function changePassword() {
+    const np = document.getElementById("newPass").value;
+    const cp = document.getElementById("confirmPass").value;
+    const st = document.getElementById("passStatus");
+    if (!np) { st.innerHTML = '<span style="color:var(--red)">Password tidak boleh kosong</span>'; return; }
+    if (np !== cp) { st.innerHTML = '<span style="color:var(--red)">Password tidak cocok</span>'; return; }
+    localStorage.setItem("hn_admin_pass", np);
+    st.innerHTML = '<span style="color:var(--green)">✅ Password berhasil diganti!</span>';
+    document.getElementById("newPass").value = "";
+    document.getElementById("confirmPass").value = "";
+    setTimeout(() => st.textContent = "", 3000);
+}
+
+// ==================== CLOSE MODAL OUTSIDE CLICK ====================
+document.getElementById("menuModal").addEventListener("click", function(e) {
+    if (e.target === this) closeMenuModal();
+});
+// ==================== UPDATE STATUS PER ITEM ====================
+async function updateSingleItemStatus(orderId, itemName, newStatus) {
+    if (!SCRIPT_URL) return;
+    
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "updateItemStatus",
+                orderId: orderId,
+                itemName: itemName,
+                newStatus: newStatus
+            })
+        });
+        
+        const data = await response.json();
+        if (data.status === "ok") {
+            // Gunakan loadOrders dengan parameter true (silent reload) 
+            // agar layar tidak berkedip putih/me-reset scroll admin
+            await loadOrders(true);
+        } else {
+            alert("Gagal memperbarui status item: " + (data.message || "Unknown error"));
+        }
+    } catch (error) {
+        console.error("Error updating item status:", error);
+        alert("Terjadi kesalahan jaringan saat update status.");
+    }
+}
+</script>
+</body>
+</html>
