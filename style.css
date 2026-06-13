@@ -67,7 +67,6 @@ body {
     min-height: 100vh;
     padding-bottom: 100px;
     position: relative;
-    z-index: 1;
 }
 
 /* ==================== HEADER ==================== */
@@ -150,7 +149,7 @@ header {
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     box-shadow: var(--shadow-md);
-    z-index: 99;
+    z-index: 999;
     transition: var(--transition);
 }
 .fav-fab:hover { transform: scale(1.1); }
@@ -756,7 +755,7 @@ footer h3 { color: var(--accent); margin-bottom: 8px; }
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow-md);
-    z-index: 99;
+    z-index: 999;
     transition: var(--transition);
     color: var(--accent);
 }
