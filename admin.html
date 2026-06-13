@@ -454,8 +454,13 @@ async function loadOrders(silent = false) {
         return;
     }
     try {
-        const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
-        const data = await res.json();
+        const res = await fetch(`${SCRIPT_URL}?action=getOrders`, {
+            method: "GET",
+            redirect: "follow",
+            cache: "no-cache"
+        });
+        const text = await res.text();
+        const data = JSON.parse(text);
         currentOrders = data.orders || [];
         const newCount = currentOrders.filter(o => o.status === "Baru").length;
         const badge = document.getElementById("newOrderBadge");
@@ -468,6 +473,7 @@ async function loadOrders(silent = false) {
         if (!silent)
             document.getElementById("orders-list").innerHTML =
                 '<div class="empty-msg"><div class="em-icon">❌</div><p>Gagal memuat pesanan. Periksa URL Apps Script.</p></div>';
+        console.error("loadOrders error:", e);
     }
 }
 
@@ -521,8 +527,11 @@ async function updateStatus(orderId, newStatus) {
     if (!SCRIPT_URL) { alert("Set URL Apps Script dulu di tab Setup!"); return; }
     try {
         await fetch(SCRIPT_URL, {
-            method:"POST", headers:{"Content-Type":"text/plain"},
-            body: JSON.stringify({ action:"updateStatus", orderId, newStatus })
+            method: "POST",
+            redirect: "follow",
+            cache: "no-cache",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "updateStatus", orderId, newStatus })
         });
         const o = currentOrders.find(x => x.id === orderId);
         if (o) o.status = newStatus;
@@ -537,10 +546,13 @@ async function deleteOrder(orderId) {
     try {
         const res = await fetch(SCRIPT_URL, {
             method: "POST",
+            redirect: "follow",
+            cache: "no-cache",
             headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ action: "deleteOrder", orderId: orderId })
         });
-        const result = await res.json();
+        const text = await res.text();
+        const result = JSON.parse(text);
         if (result.status === "ok") {
             currentOrders = currentOrders.filter(o => o.id !== orderId);
             renderOrders();
@@ -558,8 +570,13 @@ async function deleteOrder(orderId) {
 async function loadStats() {
     if (!SCRIPT_URL) return;
     try {
-        const res = await fetch(`${SCRIPT_URL}?action=getStats`);
-        const data = await res.json();
+        const res = await fetch(`${SCRIPT_URL}?action=getStats`, {
+            method: "GET",
+            redirect: "follow",
+            cache: "no-cache"
+        });
+        const text = await res.text();
+        const data = JSON.parse(text);
         const s = data.stats || {};
         document.getElementById("statTotalOrders").textContent  = s.totalOrders  || 0;
         document.getElementById("statTotalRevenue").textContent = s.totalRevenue ? fmt(s.totalRevenue) : "Rp 0";
@@ -689,8 +706,11 @@ async function syncMenuToSheets() {
             desc: i.desc, image: i.image, bestSeller: i.bestSeller
         }));
         await fetch(SCRIPT_URL, {
-            method:"POST", headers:{"Content-Type":"text/plain"},
-            body: JSON.stringify({ action:"updateMenu", menu: allItems })
+            method: "POST",
+            redirect: "follow",
+            cache: "no-cache",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "updateMenu", menu: allItems })
         });
     } catch(e) { console.warn("Gagal sync menu:", e); }
 }
