@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Heritage Nusantara - Premium Indonesian Cuisine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== SUCCESS POPUP ===== -->
+<div id="success-popup" class="success-popup">
+    <div class="popup-content">
+        <div class="checkmark">✓</div>
+        <p>Successfully added to cart!</p>
+    </div>
+</div>
+
+<!-- ===== QUICK ADD MODAL ===== -->
+<div id="quickAddModal" class="quick-add-modal">
+    <div class="quick-add-content">
+        <span class="close-quick" onclick="closeQuickAddModal()">&times;</span>
+        <h3>➕ Add to Cart</h3>
+        <p id="quickAddItemName"></p>
+        <div class="quantity-wrapper">
+            <button onclick="decreaseQuickQty()">-</button>
+            <span id="quickQty">1</span>
+            <button onclick="increaseQuickQty()">+</button>
+        </div>
+        <textarea id="quickNotes" placeholder="Special request notes (optional)..."></textarea>
+        <button class="order-btn" onclick="confirmQuickAdd()">Add To Cart</button>
+    </div>
+</div>
+
+<div class="app">
+    <header>
+        <div class="restaurant-badge">✨ Premium Indonesian Cuisine</div>
+        <button class="darkmode-toggle" id="darkmodeToggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <span id="darkmodeIcon">🌙</span>
+        </button>
+        <button class="cart-icon" id="cartIconBtn" onclick="openCart()">
+            🛒
+            <span id="cart-count">0</span>
+        </button>
+        <div class="logo-circle">🍃</div>
+        <h1 class="restaurant-name">Heritage Nusantara</h1>
+        <p class="restaurant-tagline">Authentic Indonesian Cuisine</p>
+        <div class="header-info">
+            🍽 Signature Menu • 🌶 Indonesian Spices • ⭐ Premium Quality
+        </div>
+    </header>
+
+    <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="🔍 Search menu..." onkeyup="searchMenu()">
+    </div>
+    <div class="sort-wrapper">
+        <select id="sortMenu" onchange="sortMenu()">
+            <option value="" disabled selected>Sort Menu</option>
+            <option value="default">❌ Clear Filter (Default)</option>
+            <option value="az">A-Z</option>
+            <option value="za">Z-A</option>
+            <option value="low">Price Low to High</option>
+            <option value="high">Price High to Low</option>
+        </select>
+    </div>
+    <div class="category-wrapper">
+        <button class="category-btn active" onclick="changeCategory(this,'all')">🍽 ALL</button>
+        <button class="category-btn" onclick="changeCategory(this,'makanan')">🍛 FOOD</button>
+        <button class="category-btn" onclick="changeCategory(this,'dessert')">🍨 DESSERT</button>
+        <button class="category-btn" onclick="changeCategory(this,'minuman')">🥤 BEVERAGES</button>
+    </div>
+    <div id="menu-list"></div>
+
+    <section class="about-section">
+        <div class="about-icon">🍃</div>
+        <h2>About <span>Heritage Nusantara</span></h2>
+        <p>Heritage Nusantara presents authentic Indonesian cuisine crafted from selected ingredients and traditional recipes passed down through generations.</p>
+        <p>Our mission is to preserve Indonesia's culinary heritage while delivering a premium dining experience for every guest.</p>
+    </section>
+    <footer>
+        <h3>Heritage Nusantara</h3>
+        <p>Authentic Indonesian Cuisine</p>
+        <small>© 2026 Heritage Nusantara</small>
+    </footer>
+</div>
+
+<!-- ===== MODAL DETAIL ===== -->
+<div id="modal" class="modal">
+    <div class="modal-container">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <div class="modal-scrollable">
+            <img id="modal-image" class="modal-image" loading="lazy">
+            <div class="modal-content-inner">
+                <div class="modal-header-row">
+                    <div id="modal-category" class="modal-category"></div>
+                    <button class="fav-btn" id="modalFavBtn" onclick="toggleFavFromModal()" title="Add to Favorites">♡</button>
+                    <button class="share-btn" id="modalShareBtn" onclick="shareItem()" title="Share Menu">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </button>
+                </div>
+                <h2 id="modal-name" class="modal-name"></h2>
+                <div id="modal-price" class="modal-price"></div>
+                <p id="modal-desc" class="modal-description"></p>
+                <div class="modal-quantity">
+                    <button class="qty-control" onclick="decreaseModalQty()">−</button>
+                    <span id="modal-qty">1</span>
+                    <button class="qty-control" onclick="increaseModalQty()">+</button>
+                </div>
+                <textarea id="modal-notes" placeholder="Special request notes (optional)..."></textarea>
+                <button class="modal-add-btn" onclick="addToCartFromModal()">Add To Cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== CART MODAL ===== -->
+<div id="cartModal" class="cart-modal">
+    <div class="cart-content">
+        <span class="close" onclick="closeCart()">×</span>
+
+        <!-- Screen 1: Cart -->
+        <div id="cart-screen">
+            <h2>🛒 Your Cart</h2>
+            <div id="cart-items"></div>
+            <div id="cart-empty-state" class="cart-empty-state" style="display:none;">
+                <div class="empty-icon">🛒</div>
+                <p>Your cart is empty</p>
+                <small>Add some delicious items!</small>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    Total: <span id="cart-total">Rp 0</span>
+                </div>
+                <div class="cart-actions-row">
+                    <button class="clear-cart-btn" onclick="clearCart()">🗑 Clear All</button>
+                    <button class="checkout-btn" onclick="proceedOrder()">Proceed Order</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Order Summary + Table Number -->
+        <div id="order-summary-screen" style="display:none;">
+            <h2>📋 Order Summary</h2>
+            <div class="table-input-wrapper">
+                <label>🪑 Table Number</label>
+                <input type="text" id="tableNumber" placeholder="e.g. Table 5" maxlength="20">
+            </div>
+            <div id="order-summary-items"></div>
+            <div class="order-summary-total">
+                <span>Total</span>
+                <span id="order-summary-grand-total"></span>
+            </div>
+            <div class="order-timestamp">
+                <span id="order-time-display"></span>
+            </div>
+            <div class="summary-btn-row">
+                <button class="back-btn" onclick="backToCart()">← Back</button>
+                <button class="checkout-btn" onclick="sendOrderAndMonitor()">Send Order →</button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Payment (QRIS) -->
+        <div id="payment-screen" style="display:none;">
+            <h2>💳 QRIS Payment</h2>
+            <div class="payment-info-box">
+                <div class="pay-table-info" id="payTableInfo"></div>
+                <div class="pay-total-info" id="payTotalInfo"></div>
+                <div class="pay-time-info" id="payTimeInfo"></div>
+            </div>
+            <div class="qris-placeholder">
+                <div class="barcode-box">
+                    <img src="images/QRIS.jpg" alt="QRIS Payment" loading="lazy" style="width:100%; max-width:200px; display:block; margin:0 auto;">
+                </div>
+            </div>
+            <div id="payOrderId" style="text-align:center;font-size:14px;margin-bottom:10px;color:#10b981;font-weight:600;min-height:22px;"></div>
+            <p class="qris-note">Scan the QR code above using your mobile banking or e-wallet app</p>
+            <button class="checkout-btn" style="background:#64748b; margin-top:12px;" onclick="backToSummary()">← Back</button>
+        </div>
+
+        <!-- Screen 4: Pantauan Menu (Bill Monitor) -->
+        <div id="bill-monitor-screen" style="display:none;">
+            <h2>📊 Pantauan Menu</h2>
+            <div id="bill-order-id" style="font-size:12px; text-align:center; color:var(--muted); margin-bottom:10px;"></div>
+            <div id="bill-items-list"></div>
+            <div class="order-summary-total" style="margin:10px 0;">
+                <span>Total Tagihan</span>
+                <span id="bill-total">Rp 0</span>
+            </div>
+            <div id="bill-status-badge" style="text-align:center; margin:10px 0;"></div>
+            <div class="summary-btn-row">
+                <button class="back-btn" onclick="closeBillMonitor()">Tutup</button>
+                <button id="closeBillBtn" class="checkout-btn" style="background: linear-gradient(135deg, var(--accent), var(--accent2));" onclick="confirmPaymentAndClose()">✅ Sudah Bayar & Tutup Bill</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== FAVORITES MODAL ===== -->
+<div id="favModal" class="fav-modal">
+    <div class="fav-content">
+        <span class="close-fav" onclick="closeFavModal()">&times;</span>
+        <h2>❤️ Favorites</h2>
+        <div id="fav-list"></div>
+        <div id="fav-empty" class="fav-empty" style="display:none;">
+            <div class="empty-icon">💔</div>
+            <p>No favorites yet</p>
+            <small>Tap ♡ on any menu to save it here</small>
+        </div>
+    </div>
+</div>
+
+<!-- ===== FAVORITES FAB (geser ke atas) ===== -->
+<button class="fav-fab" onclick="openFavModal()" title="My Favorites">❤️</button>
+
+<!-- ===== TOMBOL PANTAUAN MENU (di atas favorit) ===== -->
+<button class="bill-fab" id="billFabBtn" onclick="openBillMonitor()" title="Pantau Pesanan" style="display:none;">📋</button>
+
+<!-- ===== SHARE TOAST ===== -->
+<div id="shareToast" class="share-toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
