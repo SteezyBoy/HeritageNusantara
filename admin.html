@@ -344,38 +344,38 @@ const ADMIN_USERS = { "admin": "heritage2026" };
 let SCRIPT_URL = localStorage.getItem("hn_admin_url") || "";
 let currentOrders = [];
 let currentFilter = "semua";
-let editingMenuIndex = null;
+let editingMenuId = null;
 let adminDark = localStorage.getItem("hn_admin_dark") === "true";
 let autoRefreshTimer = null;
 
 // ==================== MENU DATA (lokal) ====================
 let adminMenuData = {
     makanan: [
-        { name:"Tahu Isi Goreng",    category:"Appetizer",   bestSeller:true,  image:"images/TAHU ISI GORENG.jpeg",    desc:"Tahu renyah yang digoreng keemasan, berisi sayuran segar pilihan.", price:35000 },
-        { name:"Lumpia Semarang",    category:"Appetizer",   bestSeller:false, image:"images/LUMPIA SEMARANG.jpeg",    desc:"Camilan legendaris khas Semarang dengan isian rebung manis gurih.", price:45000 },
-        { name:"Perkedel Kentang",   category:"Appetizer",   bestSeller:false, image:"images/PERKEDEL KENTANG.jpeg",   desc:"Perkedel kentang lembut dengan paduan bumbu rempah tradisional.", price:45000 },
-        { name:"Soto Ayam Lamongan", category:"Soup",        bestSeller:true,  image:"images/SOTO AYAM LAMONGAN.jpeg", desc:"Kuah soto kuning kaya rempah dengan suwiran ayam kampung.", price:40000 },
-        { name:"Soup Buntut",        category:"Soup",        bestSeller:true,  image:"images/SOP BUNTUT.jpeg",         desc:"Potongan buntut sapi premium yang dimasak perlahan.", price:70000 },
-        { name:"Soup Ikan Batam",    category:"Soup",        bestSeller:false, image:"images/SOUP IKAN BATAM.jpeg",    desc:"Sop ikan segar khas perairan Kepulauan Riau.", price:70000 },
-        { name:"Nasi Goreng Kampung",category:"Main Course", bestSeller:true,  image:"images/NASI GORENG KAMPUNG.jpeg",desc:"Nasi goreng beraroma terasi khas pedesaan.", price:75000 },
-        { name:"Ayam Bakar Taliwang",category:"Main Course", bestSeller:true,  image:"images/AYAM BAKAR TALIWANG.jpeg",desc:"Ayam kampung bakar bumbu pedas manis khas Lombok.", price:85000 },
-        { name:"Rendang Daging Sapi",category:"Main Course", bestSeller:true,  image:"images/RENDANG DAGING SAPI.jpeg",desc:"Mahakarya kuliner Minang. Daging sapi pilihan.", price:90000 }
+        { id: "menu_default_1", name:"Tahu Isi Goreng",    category:"Appetizer",   bestSeller:true,  image:"images/TAHU ISI GORENG.jpeg",    desc:"Tahu renyah yang digoreng keemasan, berisi sayuran segar pilihan.", price:35000 },
+        { id: "menu_default_2", name:"Lumpia Semarang",    category:"Appetizer",   bestSeller:false, image:"images/LUMPIA SEMARANG.jpeg",    desc:"Camilan legendaris khas Semarang dengan isian rebung manis gurih.", price:45000 },
+        { id: "menu_default_3", name:"Perkedel Kentang",   category:"Appetizer",   bestSeller:false, image:"images/PERKEDEL KENTANG.jpeg",   desc:"Perkedel kentang lembut dengan paduan bumbu rempah tradisional.", price:45000 },
+        { id: "menu_default_4", name:"Soto Ayam Lamongan", category:"Soup",        bestSeller:true,  image:"images/SOTO AYAM LAMONGAN.jpeg", desc:"Kuah soto kuning kaya rempah dengan suwiran ayam kampung.", price:40000 },
+        { id: "menu_default_5", name:"Soup Buntut",        category:"Soup",        bestSeller:true,  image:"images/SOP BUNTUT.jpeg",         desc:"Potongan buntut sapi premium yang dimasak perlahan.", price:70000 },
+        { id: "menu_default_6", name:"Soup Ikan Batam",    category:"Soup",        bestSeller:false, image:"images/SOUP IKAN BATAM.jpeg",    desc:"Sop ikan segar khas perairan Kepulauan Riau.", price:70000 },
+        { id: "menu_default_7", name:"Nasi Goreng Kampung",category:"Main Course", bestSeller:true,  image:"images/NASI GORENG KAMPUNG.jpeg",desc:"Nasi goreng beraroma terasi khas pedesaan.", price:75000 },
+        { id: "menu_default_8", name:"Ayam Bakar Taliwang",category:"Main Course", bestSeller:true,  image:"images/AYAM BAKAR TALIWANG.jpeg",desc:"Ayam kampung bakar bumbu pedas manis khas Lombok.", price:85000 },
+        { id: "menu_default_9", name:"Rendang Daging Sapi",category:"Main Course", bestSeller:true,  image:"images/RENDANG DAGING SAPI.jpeg",desc:"Mahakarya kuliner Minang. Daging sapi pilihan.", price:90000 }
     ],
     minuman: [
-        { name:"Es Teh",       category:"Beverage", bestSeller:false, image:"images/ES TEH.jpeg",        desc:"Seduhan teh melati pilihan yang dihidangkan dingin.", price:25000 },
-        { name:"Es Kelapa Muda",category:"Beverage",bestSeller:true,  image:"images/ES KELAPA MUDA.jpeg",desc:"Air kelapa segar murni dengan serutan daging kelapa muda.", price:65000 },
-        { name:"Teh Rosella",  category:"Beverage", bestSeller:false, image:"images/TEH ROSELLA.jpeg",   desc:"Seduhan bunga rosella merah merona.", price:35000 },
-        { name:"Es Jeruk",     category:"Beverage", bestSeller:false, image:"images/ES JERUK.jpeg",      desc:"Perasan jeruk peras asli yang manis dan menyegarkan.", price:30000 },
-        { name:"Teh Tarik",    category:"Beverage", bestSeller:true,  image:"images/TEH TARIK.jpeg",     desc:"Paduan teh hitam pekat dan susu kental manis.", price:35000 },
-        { name:"Wedang Jahe",  category:"Beverage", bestSeller:false, image:"images/WEDANG JAHE.jpeg",   desc:"Minuman tradisional penghangat tubuh dari jahe bakar.", price:25000 },
-        { name:"Beer Pletok",  category:"Beverage", bestSeller:false, image:"images/BEER PLETOK.jpeg",   desc:"Minuman rempah non-alkohol khas Betawi.", price:45000 },
-        { name:"Kopi Bali",    category:"Beverage", bestSeller:true,  image:"images/KOPI BALI.jpeg",     desc:"Kopi tubruk dari biji kopi Bali premium.", price:30000 },
-        { name:"Equil Water",  category:"Beverage", bestSeller:false, image:"images/EQUIL Water.jpeg",   desc:"Air mineral alami berkarbonasi premium.", price:50000 }
+        { id: "menu_default_10", name:"Es Teh",       category:"Beverage", bestSeller:false, image:"images/ES TEH.jpeg",        desc:"Seduhan teh melati pilihan yang dihidangkan dingin.", price:25000 },
+        { id: "menu_default_11", name:"Es Kelapa Muda",category:"Beverage",bestSeller:true,  image:"images/ES KELAPA MUDA.jpeg",desc:"Air kelapa segar murni dengan serutan daging kelapa muda.", price:65000 },
+        { id: "menu_default_12", name:"Teh Rosella",  category:"Beverage", bestSeller:false, image:"images/TEH ROSELLA.jpeg",   desc:"Seduhan bunga rosella merah merona.", price:35000 },
+        { id: "menu_default_13", name:"Es Jeruk",     category:"Beverage", bestSeller:false, image:"images/ES JERUK.jpeg",      desc:"Perasan jeruk peras asli yang manis dan menyegarkan.", price:30000 },
+        { id: "menu_default_14", name:"Teh Tarik",    category:"Beverage", bestSeller:true,  image:"images/TEH TARIK.jpeg",     desc:"Paduan teh hitam pekat dan susu kental manis.", price:35000 },
+        { id: "menu_default_15", name:"Wedang Jahe",  category:"Beverage", bestSeller:false, image:"images/WEDANG JAHE.jpeg",   desc:"Minuman tradisional penghangat tubuh dari jahe bakar.", price:25000 },
+        { id: "menu_default_16", name:"Beer Pletok",  category:"Beverage", bestSeller:false, image:"images/BEER PLETOK.jpeg",   desc:"Minuman rempah non-alkohol khas Betawi.", price:45000 },
+        { id: "menu_default_17", name:"Kopi Bali",    category:"Beverage", bestSeller:true,  image:"images/KOPI BALI.jpeg",     desc:"Kopi tubruk dari biji kopi Bali premium.", price:30000 },
+        { id: "menu_default_18", name:"Equil Water",  category:"Beverage", bestSeller:false, image:"images/EQUIL Water.jpeg",   desc:"Air mineral alami berkarbonasi premium.", price:50000 }
     ],
     dessert: [
-        { name:"Klepon",         category:"Dessert", bestSeller:true,  image:"images/KLEPON.jpeg",         desc:"Jajanan pasar kenyal bertabur kelapa parut segar.", price:30000 },
-        { name:"Puding Gula Aren",category:"Dessert",bestSeller:false, image:"images/PUDING GULA AREN.jpeg",desc:"Makanan penutup lembut dengan manisnya gula aren.", price:45000 },
-        { name:"Es Cendol",      category:"Dessert", bestSeller:true,  image:"images/ES CENDOL.jpeg",      desc:"Paduan kenyalnya cendol pandan dan manisnya gula aren.", price:45000 }
+        { id: "menu_default_19", name:"Klepon",         category:"Dessert", bestSeller:true,  image:"images/KLEPON.jpeg",         desc:"Jajanan pasar kenyal bertabur kelapa parut segar.", price:30000 },
+        { id: "menu_default_20", name:"Puding Gula Aren",category:"Dessert",bestSeller:false, image:"images/PUDING GULA AREN.jpeg",desc:"Makanan penutup lembut dengan manisnya gula aren.", price:45000 },
+        { id: "menu_default_21", name:"Es Cendol",      category:"Dessert", bestSeller:true,  image:"images/ES CENDOL.jpeg",      desc:"Paduan kenyalnya cendol pandan dan manisnya gula aren.", price:45000 }
     ]
 };
 
@@ -444,25 +444,31 @@ function switchTab(name, btn) {
 
 // ==================== FORMAT ====================
 function fmt(price) { return "Rp " + Number(price).toLocaleString("id-ID"); }
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
 
-// ==================== LOAD ORDERS ====================
+// ==================== LOAD ORDERS (PERBAIKAN) ====================
 async function loadOrders(silent = false) {
     if (!silent) document.getElementById("orders-list").innerHTML = '<div class="loading-spin"></div>';
     if (!SCRIPT_URL) {
-        document.getElementById("orders-list").innerHTML =
-            '<div class="empty-msg"><div class="em-icon">⚙️</div><p>Masukkan URL Apps Script di tab <strong>Setup</strong> dulu</p></div>';
+        currentOrders = [];
+        if (!silent)
+            document.getElementById("orders-list").innerHTML =
+                '<div class="empty-msg"><div class="em-icon">⚙️</div><p>Masukkan URL Apps Script di tab <strong>Setup</strong> dulu</p></div>';
         return;
     }
     try {
-        const res = await fetch(`${SCRIPT_URL}?action=getOrders`, {
-            method: "GET",
-            redirect: "follow",
-            cache: "no-cache"
-        });
-        const text = await res.text();
-        const data = JSON.parse(text);
-        currentOrders = data.orders || [];
-        const newCount = currentOrders.filter(o => o.status === "Baru").length;
+        const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
+        const data = await res.json();
+        currentOrders = Array.isArray(data.orders) ? data.orders : [];
+        const newCount = currentOrders.filter(o => o && o.status === "Baru").length;
         const badge = document.getElementById("newOrderBadge");
         if (newCount > 0) { badge.style.display = "inline-block"; badge.textContent = newCount; }
         else { badge.style.display = "none"; }
@@ -470,10 +476,10 @@ async function loadOrders(silent = false) {
         document.getElementById("lastRefreshTime").textContent =
             "Terakhir diperbarui: " + new Date().toLocaleTimeString("id-ID");
     } catch(e) {
+        currentOrders = [];
         if (!silent)
             document.getElementById("orders-list").innerHTML =
                 '<div class="empty-msg"><div class="em-icon">❌</div><p>Gagal memuat pesanan. Periksa URL Apps Script.</p></div>';
-        console.error("loadOrders error:", e);
     }
 }
 
@@ -484,54 +490,72 @@ function filterOrders(status, btn) {
     renderOrders();
 }
 
+// PERBAIKAN: renderOrders dengan validasi dan escapeHtml
 function renderOrders() {
     const list = document.getElementById("orders-list");
-    const filtered = currentFilter === "semua"
-        ? currentOrders
-        : currentOrders.filter(o => o.status === currentFilter);
-    if (filtered.length === 0) {
+    if (!Array.isArray(currentOrders)) {
+        list.innerHTML = '<div class="empty-msg"><div class="em-icon">⚠️</div><p>Data pesanan tidak valid</p></div>';
+        return;
+    }
+    
+    let filtered;
+    try {
+        filtered = currentFilter === "semua"
+            ? currentOrders
+            : currentOrders.filter(o => o && o.status === currentFilter);
+    } catch(e) {
+        list.innerHTML = '<div class="empty-msg"><div class="em-icon">❌</div><p>Error memfilter pesanan</p></div>';
+        return;
+    }
+    
+    if (!filtered.length) {
         list.innerHTML = '<div class="empty-msg"><div class="em-icon">📋</div><p>Tidak ada pesanan</p></div>';
         return;
     }
-    list.innerHTML = filtered.map(order => {
-        const statusClass = (order.status || "Baru").toLowerCase().replace(/ /g,"");
-        const badgeClass  = "badge-" + statusClass;
-        const itemsHtml   = (order.items || []).map(it => `
-            <div class="order-item-row">
-                <span>${it.qty}× ${it.name} ${it.notes && it.notes!=="-"?`<em class="note">(${it.notes})</em>`:""}</span>
-                <span>${fmt(it.subtotal)}</span>
-            </div>`).join("");
-        return `
-        <div class="order-card status-${statusClass}">
-            <div class="order-header">
-                <div>
-                    <div class="order-id">${order.id}</div>
-                    <div class="order-meta">🪑 Meja: ${order.table || "-"} &nbsp;•&nbsp; 🕐 ${order.time}</div>
+    
+    try {
+        list.innerHTML = filtered.map(order => {
+            if (!order || !order.id) return '';
+            const statusClass = (order.status || "Baru").toLowerCase().replace(/ /g, "");
+            const badgeClass  = "badge-" + statusClass;
+            const itemsHtml   = (order.items || []).map(it => `
+                <div class="order-item-row">
+                    <span>${it.qty}× ${escapeHtml(it.name)} ${it.notes && it.notes !== "-" ? `<em class="note">(${escapeHtml(it.notes)})</em>` : ""}</span>
+                    <span>${fmt(it.subtotal)}</span>
                 </div>
-                <span class="order-badge ${badgeClass}">${order.status || "Baru"}</span>
-            </div>
-            <div class="order-items">
-                ${itemsHtml}
-                <div class="order-total-row"><span>Total</span><span>${fmt(order.total)}</span></div>
-            </div>
-            <div class="order-actions">
-                <button class="action-btn btn-proses" onclick="updateStatus('${order.id}','Diproses')">🍳 Diproses</button>
-                <button class="action-btn btn-selesai" onclick="updateStatus('${order.id}','Selesai')">✅ Selesai</button>
-                <button class="action-btn btn-hapus"  onclick="deleteOrder('${order.id}')">🗑 Hapus</button>
-            </div>
-        </div>`;
-    }).join("");
+            `).join("");
+            return `
+            <div class="order-card status-${statusClass}">
+                <div class="order-header">
+                    <div>
+                        <div class="order-id">${escapeHtml(order.id)}</div>
+                        <div class="order-meta">🪑 Meja: ${escapeHtml(order.table || "-")} &nbsp;•&nbsp; 🕐 ${escapeHtml(order.time || "")}</div>
+                    </div>
+                    <span class="order-badge ${badgeClass}">${order.status || "Baru"}</span>
+                </div>
+                <div class="order-items">
+                    ${itemsHtml}
+                    <div class="order-total-row"><span>Total</span><span>${fmt(order.total)}</span></div>
+                </div>
+                <div class="order-actions">
+                    <button class="action-btn btn-proses" onclick="updateStatus('${order.id}','Diproses')">🍳 Diproses</button>
+                    <button class="action-btn btn-selesai" onclick="updateStatus('${order.id}','Selesai')">✅ Selesai</button>
+                    <button class="action-btn btn-hapus"  onclick="deleteOrder('${order.id}')">🗑 Hapus</button>
+                </div>
+            </div>`;
+        }).join("");
+    } catch(e) {
+        console.error(e);
+        list.innerHTML = `<div class="empty-msg"><div class="em-icon">❌</div><p>Error menampilkan pesanan: ${e.message}</p></div>`;
+    }
 }
 
 async function updateStatus(orderId, newStatus) {
     if (!SCRIPT_URL) { alert("Set URL Apps Script dulu di tab Setup!"); return; }
     try {
         await fetch(SCRIPT_URL, {
-            method: "POST",
-            redirect: "follow",
-            cache: "no-cache",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({ action: "updateStatus", orderId, newStatus })
+            method:"POST", headers:{"Content-Type":"text/plain"},
+            body: JSON.stringify({ action:"updateStatus", orderId, newStatus })
         });
         const o = currentOrders.find(x => x.id === orderId);
         if (o) o.status = newStatus;
@@ -539,20 +563,16 @@ async function updateStatus(orderId, newStatus) {
     } catch(e) { alert("Gagal update status: " + e.message); }
 }
 
-// ==================== DELETE ORDER (sudah diperbaiki) ====================
 async function deleteOrder(orderId) {
     if (!confirm(`Hapus pesanan ${orderId}?`)) return;
     if (!SCRIPT_URL) { alert("URL Apps Script belum diset!"); return; }
     try {
         const res = await fetch(SCRIPT_URL, {
             method: "POST",
-            redirect: "follow",
-            cache: "no-cache",
             headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ action: "deleteOrder", orderId: orderId })
         });
-        const text = await res.text();
-        const result = JSON.parse(text);
+        const result = await res.json();
         if (result.status === "ok") {
             currentOrders = currentOrders.filter(o => o.id !== orderId);
             renderOrders();
@@ -570,23 +590,17 @@ async function deleteOrder(orderId) {
 async function loadStats() {
     if (!SCRIPT_URL) return;
     try {
-        const res = await fetch(`${SCRIPT_URL}?action=getStats`, {
-            method: "GET",
-            redirect: "follow",
-            cache: "no-cache"
-        });
-        const text = await res.text();
-        const data = JSON.parse(text);
+        const res = await fetch(`${SCRIPT_URL}?action=getStats`);
+        const data = await res.json();
         const s = data.stats || {};
         document.getElementById("statTotalOrders").textContent  = s.totalOrders  || 0;
         document.getElementById("statTotalRevenue").textContent = s.totalRevenue ? fmt(s.totalRevenue) : "Rp 0";
         document.getElementById("statTodayOrders").textContent  = s.todayOrders  || 0;
         document.getElementById("statTodayRevenue").textContent = s.todayRevenue ? fmt(s.todayRevenue) : "Rp 0";
 
-        // Top items
         const topHtml = (s.topItems || []).map((it,i) => `
             <div class="top-item">
-                <span class="top-item-name">${i+1}. ${it.name}</span>
+                <span class="top-item-name">${i+1}. ${escapeHtml(it.name)}</span>
                 <span class="top-item-qty">${it.qty}× terjual</span>
             </div>`).join("") || '<div style="color:var(--muted);font-size:14px;">Belum ada data</div>';
         document.getElementById("topItemsList").innerHTML = topHtml;
@@ -599,7 +613,7 @@ async function loadStats() {
     }
 }
 
-// ==================== MENU MANAGER ====================
+// ==================== MENU MANAGER (DENGAN ID UNIK) ====================
 function getAllAdminItems() {
     return [
         ...adminMenuData.makanan.map(i=>({...i,_cat:"makanan"})),
@@ -616,24 +630,28 @@ function renderAdminMenu() {
         list.innerHTML = '<div class="empty-msg"><div class="em-icon">🍽</div><p>Belum ada menu</p></div>';
         return;
     }
-    list.innerHTML = all.map((item, i) => `
-        <div class="menu-item-row">
-            <img src="${item.image}" alt="${item.name}"
-                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect fill=%22%23f1f5f9%22 width=%2260%22 height=%2260%22/></svg>'">
+    list.innerHTML = all.map(item => `
+        <div class="menu-item-row" data-id="${item.id}">
+            <img src="${item.image}" alt="${item.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect fill=%22%23f1f5f9%22 width=%2260%22 height=%2260%22/></svg>'">
             <div class="menu-item-info">
-                <strong>${item.name} ${item.bestSeller?"🔥":""}</strong>
+                <strong>${escapeHtml(item.name)} ${item.bestSeller?"🔥":""}</strong>
                 <span>${fmt(item.price)}</span>
-                <small>${item.category} • ${item._cat}</small>
+                <small>${escapeHtml(item.category)} • ${item._cat}</small>
             </div>
             <div class="menu-item-btns">
-                <button class="edit-btn" onclick="openEditMenu(${i})">✏️ Edit</button>
-                <button class="del-btn"  onclick="deleteMenuItem(${i})">🗑</button>
+                <button class="edit-btn" onclick="openEditMenu('${item.id}')">✏️ Edit</button>
+                <button class="del-btn"  onclick="deleteMenuItem('${item.id}')">🗑</button>
             </div>
-        </div>`).join("");
+        </div>
+    `).join("");
+}
+
+function generateMenuId() {
+    return 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
 }
 
 function openAddMenu() {
-    editingMenuIndex = null;
+    editingMenuId = null;
     document.getElementById("menuModalTitle").textContent = "➕ Tambah Menu";
     document.getElementById("fName").value = "";
     document.getElementById("fPrice").value = "";
@@ -645,9 +663,11 @@ function openAddMenu() {
     document.getElementById("menuModal").classList.add("open");
 }
 
-function openEditMenu(globalIndex) {
-    editingMenuIndex = globalIndex;
-    const item = getAllAdminItems()[globalIndex];
+function openEditMenu(id) {
+    editingMenuId = id;
+    const all = getAllAdminItems();
+    const item = all.find(i => i.id === id);
+    if (!item) return;
     document.getElementById("menuModalTitle").textContent = "✏️ Edit Menu";
     document.getElementById("fName").value   = item.name;
     document.getElementById("fPrice").value  = item.price;
@@ -672,15 +692,19 @@ function saveMenuItem() {
     const image  = document.getElementById("fImage").value.trim();
     const best   = document.getElementById("fBestSeller").checked;
     if (!name || !price) { alert("Nama dan harga wajib diisi!"); return; }
-    const newItem = { name, price, category: subcat, desc, image, bestSeller: best };
-    if (editingMenuIndex === null) {
+    const newItem = { 
+        id: generateMenuId(),
+        name, price, category: subcat, desc, image, bestSeller: best 
+    };
+    if (editingMenuId === null) {
         adminMenuData[cat].push(newItem);
     } else {
-        const all = getAllAdminItems();
-        const old = all[editingMenuIndex];
-        const oldCat = old._cat;
-        const idx = adminMenuData[oldCat].findIndex(i => i.name === old.name);
-        if (idx !== -1) adminMenuData[oldCat].splice(idx, 1);
+        // Hapus item lama dari kategori mana pun
+        for (let c in adminMenuData) {
+            const idx = adminMenuData[c].findIndex(i => i.id === editingMenuId);
+            if (idx !== -1) adminMenuData[c].splice(idx, 1);
+        }
+        // Tambahkan ke kategori baru
         adminMenuData[cat].push(newItem);
     }
     closeMenuModal();
@@ -688,11 +712,13 @@ function saveMenuItem() {
     syncMenuToSheets();
 }
 
-function deleteMenuItem(globalIndex) {
-    const item = getAllAdminItems()[globalIndex];
+function deleteMenuItem(id) {
+    const all = getAllAdminItems();
+    const item = all.find(i => i.id === id);
+    if (!item) return;
     if (!confirm(`Hapus "${item.name}"?`)) return;
     const arr = adminMenuData[item._cat];
-    const idx = arr.findIndex(i => i.name === item.name);
+    const idx = arr.findIndex(i => i.id === id);
     if (idx !== -1) arr.splice(idx, 1);
     renderAdminMenu();
     syncMenuToSheets();
@@ -706,11 +732,8 @@ async function syncMenuToSheets() {
             desc: i.desc, image: i.image, bestSeller: i.bestSeller
         }));
         await fetch(SCRIPT_URL, {
-            method: "POST",
-            redirect: "follow",
-            cache: "no-cache",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({ action: "updateMenu", menu: allItems })
+            method:"POST", headers:{"Content-Type":"text/plain"},
+            body: JSON.stringify({ action:"updateMenu", menu: allItems })
         });
     } catch(e) { console.warn("Gagal sync menu:", e); }
 }
@@ -724,8 +747,10 @@ function saveSetup() {
         '<span style="color:var(--green)">✅ URL berhasil disimpan! Memuat ulang data...</span>';
     setTimeout(() => {
         document.getElementById("setupStatus").textContent = "";
-        loadOrders(); loadStats();
-    }, 1500);
+        loadOrders();
+        loadStats();
+        if (document.getElementById("panel-menu").classList.contains("active")) renderAdminMenu();
+    }, 500);
 }
 
 function changePassword() {
