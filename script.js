@@ -3,7 +3,7 @@
 // Versi dengan Proceed Order, Pantauan Menu, dan Payment
 // ================================================================
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTe14IGIPObTlKzfpjU0O4glqCB-0CJOt-_Enxj2HPp35tMhjYfZc8CejATy-qRpCdjQ/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1YJxy_O-Ga3s4AoHS5kMoKu2Us_0s3R8h2uIngT3zMPfJt4DwIrFyqrO-YA-0p21mVA/exec";
 
 let currentCategory = "all";
 let currentItem = null;
