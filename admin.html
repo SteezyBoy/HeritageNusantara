@@ -161,7 +161,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
 </head>
 <body>
 
-<!-- ===== LOGIN SCREEN ===== -->
 <div class="login-wrap" id="loginWrap">
     <div class="login-box">
         <div class="login-logo">🍃</div>
@@ -175,10 +174,7 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
     </div>
 </div>
 
-<!-- ===== ADMIN PANEL ===== -->
 <div class="admin-wrap" id="adminWrap">
-
-    <!-- Topbar -->
     <div class="topbar">
         <div class="topbar-left">
             <h2>🍃 Heritage Nusantara</h2>
@@ -190,7 +186,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
         </div>
     </div>
 
-    <!-- Stats -->
     <div class="stats-grid" id="statsGrid">
         <div class="stat-card accent">
             <div class="icon">📋</div>
@@ -214,7 +209,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
         </div>
     </div>
 
-    <!-- Tab Nav -->
     <div class="tab-nav">
         <button class="tab-btn active" onclick="switchTab('orders',this)">
             📋 Pesanan <span class="notif-dot" id="newOrderBadge" style="display:none">0</span>
@@ -224,7 +218,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
         <button class="tab-btn" onclick="switchTab('setup',this)">⚙️ Setup</button>
     </div>
 
-    <!-- ===== PANEL: ORDERS ===== -->
     <div class="panel active" id="panel-orders">
         <div class="refresh-row">
             <div class="order-filters">
@@ -241,7 +234,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
         </div>
     </div>
 
-    <!-- ===== PANEL: MENU ===== -->
     <div class="panel" id="panel-menu">
         <div class="menu-toolbar">
             <h3>Daftar Menu (<span id="menuCount">0</span>)</h3>
@@ -250,7 +242,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
         <div id="menu-list-admin"><div class="loading-spin"></div></div>
     </div>
 
-    <!-- ===== PANEL: STATS ===== -->
     <div class="panel" id="panel-stats">
         <div class="stat-card" style="margin-bottom:14px;">
             <div class="icon">🏆</div>
@@ -264,7 +255,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
         </div>
     </div>
 
-    <!-- ===== PANEL: SETUP ===== -->
     <div class="panel" id="panel-setup">
         <div class="stat-card" style="margin-bottom:14px;">
             <h3 style="margin-bottom:16px;color:var(--text);">⚙️ Konfigurasi Apps Script</h3>
@@ -289,10 +279,8 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
             <div id="passStatus" style="margin-top:10px;font-size:13px;"></div>
         </div>
     </div>
+</div>
 
-</div><!-- end admin-wrap -->
-
-<!-- ===== MODAL FORM MENU ===== -->
 <div class="modal-overlay" id="menuModal">
     <div class="modal-box">
         <h3 id="menuModalTitle">➕ Tambah Menu</h3>
@@ -340,7 +328,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;transition:backgrou
 
 <script>
 // ==================== CONFIG ====================
-const ADMIN_USERS = { "admin": "heritage2026" };
 let SCRIPT_URL = localStorage.getItem("hn_admin_url") || "";
 let currentOrders = [];
 let currentFilter = "semua";
@@ -348,34 +335,22 @@ let editingMenuId = null;
 let adminDark = localStorage.getItem("hn_admin_dark") === "true";
 let autoRefreshTimer = null;
 
-// ==================== MENU DATA (lokal) ====================
+// Menu data default dengan ID
 let adminMenuData = {
     makanan: [
-        { id: "menu_default_1", name:"Tahu Isi Goreng",    category:"Appetizer",   bestSeller:true,  image:"images/TAHU ISI GORENG.jpeg",    desc:"Tahu renyah yang digoreng keemasan, berisi sayuran segar pilihan.", price:35000 },
-        { id: "menu_default_2", name:"Lumpia Semarang",    category:"Appetizer",   bestSeller:false, image:"images/LUMPIA SEMARANG.jpeg",    desc:"Camilan legendaris khas Semarang dengan isian rebung manis gurih.", price:45000 },
-        { id: "menu_default_3", name:"Perkedel Kentang",   category:"Appetizer",   bestSeller:false, image:"images/PERKEDEL KENTANG.jpeg",   desc:"Perkedel kentang lembut dengan paduan bumbu rempah tradisional.", price:45000 },
-        { id: "menu_default_4", name:"Soto Ayam Lamongan", category:"Soup",        bestSeller:true,  image:"images/SOTO AYAM LAMONGAN.jpeg", desc:"Kuah soto kuning kaya rempah dengan suwiran ayam kampung.", price:40000 },
-        { id: "menu_default_5", name:"Soup Buntut",        category:"Soup",        bestSeller:true,  image:"images/SOP BUNTUT.jpeg",         desc:"Potongan buntut sapi premium yang dimasak perlahan.", price:70000 },
-        { id: "menu_default_6", name:"Soup Ikan Batam",    category:"Soup",        bestSeller:false, image:"images/SOUP IKAN BATAM.jpeg",    desc:"Sop ikan segar khas perairan Kepulauan Riau.", price:70000 },
-        { id: "menu_default_7", name:"Nasi Goreng Kampung",category:"Main Course", bestSeller:true,  image:"images/NASI GORENG KAMPUNG.jpeg",desc:"Nasi goreng beraroma terasi khas pedesaan.", price:75000 },
-        { id: "menu_default_8", name:"Ayam Bakar Taliwang",category:"Main Course", bestSeller:true,  image:"images/AYAM BAKAR TALIWANG.jpeg",desc:"Ayam kampung bakar bumbu pedas manis khas Lombok.", price:85000 },
-        { id: "menu_default_9", name:"Rendang Daging Sapi",category:"Main Course", bestSeller:true,  image:"images/RENDANG DAGING SAPI.jpeg",desc:"Mahakarya kuliner Minang. Daging sapi pilihan.", price:90000 }
+        { id: "menu_default_1", name:"Tahu Isi Goreng",    category:"Appetizer",   bestSeller:true,  image:"images/TAHU ISI GORENG.jpeg",    desc:"Tahu renyah yang digoreng keemasan.", price:35000 },
+        { id: "menu_default_2", name:"Lumpia Semarang",    category:"Appetizer",   bestSeller:false, image:"images/LUMPIA SEMARANG.jpeg",    desc:"Camilan legendaris khas Semarang.", price:45000 },
+        { id: "menu_default_3", name:"Soto Ayam Lamongan", category:"Soup",        bestSeller:true,  image:"images/SOTO AYAM LAMONGAN.jpeg", desc:"Kuah soto kuning kaya rempah.", price:40000 },
+        { id: "menu_default_4", name:"Nasi Goreng Kampung",category:"Main Course", bestSeller:true,  image:"images/NASI GORENG KAMPUNG.jpeg",desc:"Nasi goreng beraroma terasi.", price:75000 },
+        { id: "menu_default_5", name:"Rendang Daging Sapi",category:"Main Course", bestSeller:true,  image:"images/RENDANG DAGING SAPI.jpeg",desc:"Mahakarya kuliner Minang.", price:90000 },
+        { id: "menu_default_6", name:"Ayam Bakar Taliwang",category:"Main Course", bestSeller:true,  image:"images/AYAM BAKAR TALIWANG.jpeg",desc:"Ayam kampung bakar khas Lombok.", price:85000 }
     ],
     minuman: [
-        { id: "menu_default_10", name:"Es Teh",       category:"Beverage", bestSeller:false, image:"images/ES TEH.jpeg",        desc:"Seduhan teh melati pilihan yang dihidangkan dingin.", price:25000 },
-        { id: "menu_default_11", name:"Es Kelapa Muda",category:"Beverage",bestSeller:true,  image:"images/ES KELAPA MUDA.jpeg",desc:"Air kelapa segar murni dengan serutan daging kelapa muda.", price:65000 },
-        { id: "menu_default_12", name:"Teh Rosella",  category:"Beverage", bestSeller:false, image:"images/TEH ROSELLA.jpeg",   desc:"Seduhan bunga rosella merah merona.", price:35000 },
-        { id: "menu_default_13", name:"Es Jeruk",     category:"Beverage", bestSeller:false, image:"images/ES JERUK.jpeg",      desc:"Perasan jeruk peras asli yang manis dan menyegarkan.", price:30000 },
-        { id: "menu_default_14", name:"Teh Tarik",    category:"Beverage", bestSeller:true,  image:"images/TEH TARIK.jpeg",     desc:"Paduan teh hitam pekat dan susu kental manis.", price:35000 },
-        { id: "menu_default_15", name:"Wedang Jahe",  category:"Beverage", bestSeller:false, image:"images/WEDANG JAHE.jpeg",   desc:"Minuman tradisional penghangat tubuh dari jahe bakar.", price:25000 },
-        { id: "menu_default_16", name:"Beer Pletok",  category:"Beverage", bestSeller:false, image:"images/BEER PLETOK.jpeg",   desc:"Minuman rempah non-alkohol khas Betawi.", price:45000 },
-        { id: "menu_default_17", name:"Kopi Bali",    category:"Beverage", bestSeller:true,  image:"images/KOPI BALI.jpeg",     desc:"Kopi tubruk dari biji kopi Bali premium.", price:30000 },
-        { id: "menu_default_18", name:"Equil Water",  category:"Beverage", bestSeller:false, image:"images/EQUIL Water.jpeg",   desc:"Air mineral alami berkarbonasi premium.", price:50000 }
+        { id: "menu_default_7", name:"Es Teh",       category:"Beverage", bestSeller:false, image:"images/ES TEH.jpeg",        desc:"Seduhan teh melati dingin.", price:25000 },
+        { id: "menu_default_8", name:"Kopi Bali",    category:"Beverage", bestSeller:true,  image:"images/KOPI BALI.jpeg",     desc:"Kopi tubruk dari biji kopi Bali.", price:30000 }
     ],
     dessert: [
-        { id: "menu_default_19", name:"Klepon",         category:"Dessert", bestSeller:true,  image:"images/KLEPON.jpeg",         desc:"Jajanan pasar kenyal bertabur kelapa parut segar.", price:30000 },
-        { id: "menu_default_20", name:"Puding Gula Aren",category:"Dessert",bestSeller:false, image:"images/PUDING GULA AREN.jpeg",desc:"Makanan penutup lembut dengan manisnya gula aren.", price:45000 },
-        { id: "menu_default_21", name:"Es Cendol",      category:"Dessert", bestSeller:true,  image:"images/ES CENDOL.jpeg",      desc:"Paduan kenyalnya cendol pandan dan manisnya gula aren.", price:45000 }
+        { id: "menu_default_9", name:"Klepon",       category:"Dessert", bestSeller:true,  image:"images/KLEPON.jpeg",        desc:"Jajanan pasar kenyal bertabur kelapa.", price:30000 }
     ]
 };
 
@@ -386,7 +361,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (SCRIPT_URL) document.getElementById("setupUrl").value = SCRIPT_URL;
 });
 
-// ==================== LOGIN ====================
 function doLogin() {
     const user = document.getElementById("loginUser").value.trim();
     const pass = document.getElementById("loginPass").value;
@@ -415,14 +389,12 @@ function showAdmin() {
     loadOrders();
     loadStats();
     renderAdminMenu();
-    // Auto-refresh pesanan setiap 30 detik
     autoRefreshTimer = setInterval(() => {
         loadOrders(true);
         loadStats();
     }, 30000);
 }
 
-// ==================== DARK MODE ====================
 function toggleAdminDark() {
     adminDark = !adminDark;
     localStorage.setItem("hn_admin_dark", adminDark);
@@ -432,7 +404,6 @@ function applyAdminDark() {
     document.documentElement.setAttribute("data-theme", adminDark ? "dark" : "light");
 }
 
-// ==================== TABS ====================
 function switchTab(name, btn) {
     document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -442,7 +413,6 @@ function switchTab(name, btn) {
     if (name === "stats") loadStats();
 }
 
-// ==================== FORMAT ====================
 function fmt(price) { return "Rp " + Number(price).toLocaleString("id-ID"); }
 function escapeHtml(str) {
     if (!str) return '';
@@ -454,7 +424,7 @@ function escapeHtml(str) {
     });
 }
 
-// ==================== LOAD ORDERS (PERBAIKAN) ====================
+// ==================== LOAD ORDERS (FIXED) ====================
 async function loadOrders(silent = false) {
     if (!silent) document.getElementById("orders-list").innerHTML = '<div class="loading-spin"></div>';
     if (!SCRIPT_URL) {
@@ -467,8 +437,24 @@ async function loadOrders(silent = false) {
     try {
         const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
         const data = await res.json();
-        currentOrders = Array.isArray(data.orders) ? data.orders : [];
-        const newCount = currentOrders.filter(o => o && o.status === "Baru").length;
+        console.log("Raw response from server:", data);
+        // Pastikan orders adalah array, jika tidak, set kosong
+        if (data && Array.isArray(data.orders)) {
+            currentOrders = data.orders;
+        } else if (data && data.orders && typeof data.orders === 'object') {
+            // Jika bentuknya object (misal object dengan keys), konversi ke array
+            currentOrders = Object.values(data.orders);
+        } else {
+            currentOrders = [];
+        }
+        // Validasi setiap order minimal punya properti status (default 'Baru')
+        currentOrders = currentOrders.map(order => {
+            if (!order.status) order.status = "Baru";
+            if (!order.items) order.items = [];
+            if (!order.id) order.id = "Unknown";
+            return order;
+        });
+        const newCount = currentOrders.filter(o => o.status === "Baru").length;
         const badge = document.getElementById("newOrderBadge");
         if (newCount > 0) { badge.style.display = "inline-block"; badge.textContent = newCount; }
         else { badge.style.display = "none"; }
@@ -476,10 +462,11 @@ async function loadOrders(silent = false) {
         document.getElementById("lastRefreshTime").textContent =
             "Terakhir diperbarui: " + new Date().toLocaleTimeString("id-ID");
     } catch(e) {
+        console.error("Load orders error:", e);
         currentOrders = [];
         if (!silent)
             document.getElementById("orders-list").innerHTML =
-                '<div class="empty-msg"><div class="em-icon">❌</div><p>Gagal memuat pesanan. Periksa URL Apps Script.</p></div>';
+                '<div class="empty-msg"><div class="em-icon">❌</div><p>Gagal memuat pesanan. Periksa URL Apps Script.<br>Error: ' + e.message + '</p></div>';
     }
 }
 
@@ -490,7 +477,7 @@ function filterOrders(status, btn) {
     renderOrders();
 }
 
-// PERBAIKAN: renderOrders dengan validasi dan escapeHtml
+// ==================== RENDER ORDERS (FIXED - SEMUA PASTI MUNCUL) ====================
 function renderOrders() {
     const list = document.getElementById("orders-list");
     if (!Array.isArray(currentOrders)) {
@@ -498,33 +485,43 @@ function renderOrders() {
         return;
     }
     
-    let filtered;
+    // Proses filtering dengan aman
+    let filtered = [];
     try {
-        filtered = currentFilter === "semua"
-            ? currentOrders
-            : currentOrders.filter(o => o && o.status === currentFilter);
+        if (currentFilter === "semua") {
+            // Filter "Semua" langsung ambil semua tanpa modifikasi
+            filtered = currentOrders.slice(); // copy array
+        } else {
+            filtered = currentOrders.filter(order => order && order.status === currentFilter);
+        }
     } catch(e) {
-        list.innerHTML = '<div class="empty-msg"><div class="em-icon">❌</div><p>Error memfilter pesanan</p></div>';
+        console.error("Filter error:", e);
+        list.innerHTML = '<div class="empty-msg"><div class="em-icon">❌</div><p>Error memfilter pesanan: ' + e.message + '</p></div>';
         return;
     }
     
     if (!filtered.length) {
-        list.innerHTML = '<div class="empty-msg"><div class="em-icon">📋</div><p>Tidak ada pesanan</p></div>';
+        list.innerHTML = '<div class="empty-msg"><div class="em-icon">📋</div><p>Tidak ada pesanan untuk filter "' + currentFilter + '"</p></div>';
         return;
     }
     
-    try {
-        list.innerHTML = filtered.map(order => {
-            if (!order || !order.id) return '';
+    // Render setiap order dengan try-catch per order agar satu error tidak merusak semua
+    let html = '';
+    for (let order of filtered) {
+        try {
+            if (!order || !order.id) continue;
             const statusClass = (order.status || "Baru").toLowerCase().replace(/ /g, "");
             const badgeClass  = "badge-" + statusClass;
-            const itemsHtml   = (order.items || []).map(it => `
-                <div class="order-item-row">
-                    <span>${it.qty}× ${escapeHtml(it.name)} ${it.notes && it.notes !== "-" ? `<em class="note">(${escapeHtml(it.notes)})</em>` : ""}</span>
-                    <span>${fmt(it.subtotal)}</span>
-                </div>
-            `).join("");
-            return `
+            let itemsHtml = '';
+            if (order.items && Array.isArray(order.items)) {
+                itemsHtml = order.items.map(it => `
+                    <div class="order-item-row">
+                        <span>${it.qty}× ${escapeHtml(it.name)} ${it.notes && it.notes !== "-" ? `<em class="note">(${escapeHtml(it.notes)})</em>` : ""}</span>
+                        <span>${fmt(it.subtotal)}</span>
+                    </div>
+                `).join("");
+            }
+            html += `
             <div class="order-card status-${statusClass}">
                 <div class="order-header">
                     <div>
@@ -543,10 +540,15 @@ function renderOrders() {
                     <button class="action-btn btn-hapus"  onclick="deleteOrder('${order.id}')">🗑 Hapus</button>
                 </div>
             </div>`;
-        }).join("");
-    } catch(e) {
-        console.error(e);
-        list.innerHTML = `<div class="empty-msg"><div class="em-icon">❌</div><p>Error menampilkan pesanan: ${e.message}</p></div>`;
+        } catch(e) {
+            console.error("Error rendering order:", order, e);
+            // Skip order yang error
+        }
+    }
+    if (html === '') {
+        list.innerHTML = '<div class="empty-msg"><div class="em-icon">⚠️</div><p>Gagal menampilkan pesanan (data corrupt)</p></div>';
+    } else {
+        list.innerHTML = html;
     }
 }
 
@@ -577,7 +579,7 @@ async function deleteOrder(orderId) {
             currentOrders = currentOrders.filter(o => o.id !== orderId);
             renderOrders();
             loadStats();
-            alert("✅ Pesanan berhasil dihapus dari Sheets");
+            alert("✅ Pesanan berhasil dihapus");
         } else {
             alert("❌ Gagal menghapus: " + (result.message || "Unknown error"));
         }
@@ -597,7 +599,6 @@ async function loadStats() {
         document.getElementById("statTotalRevenue").textContent = s.totalRevenue ? fmt(s.totalRevenue) : "Rp 0";
         document.getElementById("statTodayOrders").textContent  = s.todayOrders  || 0;
         document.getElementById("statTodayRevenue").textContent = s.todayRevenue ? fmt(s.todayRevenue) : "Rp 0";
-
         const topHtml = (s.topItems || []).map((it,i) => `
             <div class="top-item">
                 <span class="top-item-name">${i+1}. ${escapeHtml(it.name)}</span>
@@ -608,31 +609,23 @@ async function loadStats() {
             `Total pesanan masuk: <strong>${s.totalOrders || 0}</strong><br>
              Pendapatan total: <strong>${s.totalRevenue ? fmt(s.totalRevenue) : "Rp 0"}</strong><br>
              Pesanan hari ini: <strong>${s.todayOrders || 0}</strong>`;
-    } catch(e) {
-        document.getElementById("statsSummary").textContent = "Gagal memuat statistik.";
-    }
+    } catch(e) { console.error(e); }
 }
 
-// ==================== MENU MANAGER (DENGAN ID UNIK) ====================
+// ==================== MENU MANAGER (ringkas) ====================
 function getAllAdminItems() {
-    return [
-        ...adminMenuData.makanan.map(i=>({...i,_cat:"makanan"})),
-        ...adminMenuData.minuman.map(i=>({...i,_cat:"minuman"})),
-        ...adminMenuData.dessert.map(i=>({...i,_cat:"dessert"}))
-    ];
+    return [...adminMenuData.makanan.map(i=>({...i,_cat:"makanan"})),
+            ...adminMenuData.minuman.map(i=>({...i,_cat:"minuman"})),
+            ...adminMenuData.dessert.map(i=>({...i,_cat:"dessert"}))];
 }
-
 function renderAdminMenu() {
     const all = getAllAdminItems();
     document.getElementById("menuCount").textContent = all.length;
     const list = document.getElementById("menu-list-admin");
-    if (all.length === 0) {
-        list.innerHTML = '<div class="empty-msg"><div class="em-icon">🍽</div><p>Belum ada menu</p></div>';
-        return;
-    }
+    if (!all.length) { list.innerHTML = '<div class="empty-msg"><div class="em-icon">🍽</div><p>Belum ada menu</p></div>'; return; }
     list.innerHTML = all.map(item => `
         <div class="menu-item-row" data-id="${item.id}">
-            <img src="${item.image}" alt="${item.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect fill=%22%23f1f5f9%22 width=%2260%22 height=%2260%22/></svg>'">
+            <img src="${item.image}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><rect fill=%22%23ddd%22 width=%2260%22 height=%2260%22/></svg>'">
             <div class="menu-item-info">
                 <strong>${escapeHtml(item.name)} ${item.bestSeller?"🔥":""}</strong>
                 <span>${fmt(item.price)}</span>
@@ -640,136 +633,30 @@ function renderAdminMenu() {
             </div>
             <div class="menu-item-btns">
                 <button class="edit-btn" onclick="openEditMenu('${item.id}')">✏️ Edit</button>
-                <button class="del-btn"  onclick="deleteMenuItem('${item.id}')">🗑</button>
+                <button class="del-btn" onclick="deleteMenuItem('${item.id}')">🗑</button>
             </div>
-        </div>
-    `).join("");
+        </div>`).join("");
 }
-
-function generateMenuId() {
-    return 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-}
-
-function openAddMenu() {
-    editingMenuId = null;
-    document.getElementById("menuModalTitle").textContent = "➕ Tambah Menu";
-    document.getElementById("fName").value = "";
-    document.getElementById("fPrice").value = "";
-    document.getElementById("fDesc").value = "";
-    document.getElementById("fImage").value = "";
-    document.getElementById("fSubcat").value = "";
-    document.getElementById("fBestSeller").checked = false;
-    document.getElementById("fCategory").value = "makanan";
-    document.getElementById("menuModal").classList.add("open");
-}
-
-function openEditMenu(id) {
-    editingMenuId = id;
-    const all = getAllAdminItems();
-    const item = all.find(i => i.id === id);
-    if (!item) return;
-    document.getElementById("menuModalTitle").textContent = "✏️ Edit Menu";
-    document.getElementById("fName").value   = item.name;
-    document.getElementById("fPrice").value  = item.price;
-    document.getElementById("fDesc").value   = item.desc;
-    document.getElementById("fImage").value  = item.image;
-    document.getElementById("fSubcat").value = item.category;
-    document.getElementById("fBestSeller").checked = item.bestSeller;
-    document.getElementById("fCategory").value = item._cat;
-    document.getElementById("menuModal").classList.add("open");
-}
-
-function closeMenuModal() {
-    document.getElementById("menuModal").classList.remove("open");
-}
-
+function generateMenuId() { return 'menu_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6); }
+function openAddMenu() { editingMenuId = null; document.getElementById("menuModalTitle").textContent = "➕ Tambah Menu"; document.getElementById("fName").value = ""; document.getElementById("fPrice").value = ""; document.getElementById("fDesc").value = ""; document.getElementById("fImage").value = ""; document.getElementById("fSubcat").value = ""; document.getElementById("fBestSeller").checked = false; document.getElementById("fCategory").value = "makanan"; document.getElementById("menuModal").classList.add("open"); }
+function openEditMenu(id) { editingMenuId = id; const item = getAllAdminItems().find(i => i.id === id); if (!item) return; document.getElementById("menuModalTitle").textContent = "✏️ Edit Menu"; document.getElementById("fName").value = item.name; document.getElementById("fPrice").value = item.price; document.getElementById("fDesc").value = item.desc; document.getElementById("fImage").value = item.image; document.getElementById("fSubcat").value = item.category; document.getElementById("fBestSeller").checked = item.bestSeller; document.getElementById("fCategory").value = item._cat; document.getElementById("menuModal").classList.add("open"); }
+function closeMenuModal() { document.getElementById("menuModal").classList.remove("open"); }
 function saveMenuItem() {
-    const name   = document.getElementById("fName").value.trim();
-    const price  = parseInt(document.getElementById("fPrice").value);
-    const cat    = document.getElementById("fCategory").value;
-    const subcat = document.getElementById("fSubcat").value.trim() || cat;
-    const desc   = document.getElementById("fDesc").value.trim();
-    const image  = document.getElementById("fImage").value.trim();
-    const best   = document.getElementById("fBestSeller").checked;
+    const name = document.getElementById("fName").value.trim(); const price = parseInt(document.getElementById("fPrice").value); const cat = document.getElementById("fCategory").value; const subcat = document.getElementById("fSubcat").value.trim() || cat; const desc = document.getElementById("fDesc").value.trim(); const image = document.getElementById("fImage").value.trim(); const best = document.getElementById("fBestSeller").checked;
     if (!name || !price) { alert("Nama dan harga wajib diisi!"); return; }
-    const newItem = { 
-        id: generateMenuId(),
-        name, price, category: subcat, desc, image, bestSeller: best 
-    };
-    if (editingMenuId === null) {
-        adminMenuData[cat].push(newItem);
-    } else {
-        // Hapus item lama dari kategori mana pun
-        for (let c in adminMenuData) {
-            const idx = adminMenuData[c].findIndex(i => i.id === editingMenuId);
-            if (idx !== -1) adminMenuData[c].splice(idx, 1);
-        }
-        // Tambahkan ke kategori baru
+    const newItem = { id: generateMenuId(), name, price, category: subcat, desc, image, bestSeller: best };
+    if (editingMenuId === null) adminMenuData[cat].push(newItem);
+    else {
+        for (let c in adminMenuData) { const idx = adminMenuData[c].findIndex(i => i.id === editingMenuId); if (idx !== -1) adminMenuData[c].splice(idx, 1); }
         adminMenuData[cat].push(newItem);
     }
-    closeMenuModal();
-    renderAdminMenu();
-    syncMenuToSheets();
+    closeMenuModal(); renderAdminMenu(); syncMenuToSheets();
 }
-
-function deleteMenuItem(id) {
-    const all = getAllAdminItems();
-    const item = all.find(i => i.id === id);
-    if (!item) return;
-    if (!confirm(`Hapus "${item.name}"?`)) return;
-    const arr = adminMenuData[item._cat];
-    const idx = arr.findIndex(i => i.id === id);
-    if (idx !== -1) arr.splice(idx, 1);
-    renderAdminMenu();
-    syncMenuToSheets();
-}
-
-async function syncMenuToSheets() {
-    if (!SCRIPT_URL) return;
-    try {
-        const allItems = getAllAdminItems().map(i => ({
-            category: i._cat, name: i.name, price: i.price,
-            desc: i.desc, image: i.image, bestSeller: i.bestSeller
-        }));
-        await fetch(SCRIPT_URL, {
-            method:"POST", headers:{"Content-Type":"text/plain"},
-            body: JSON.stringify({ action:"updateMenu", menu: allItems })
-        });
-    } catch(e) { console.warn("Gagal sync menu:", e); }
-}
-
-// ==================== SETUP ====================
-function saveSetup() {
-    const url = document.getElementById("setupUrl").value.trim();
-    SCRIPT_URL = url;
-    localStorage.setItem("hn_admin_url", url);
-    document.getElementById("setupStatus").innerHTML =
-        '<span style="color:var(--green)">✅ URL berhasil disimpan! Memuat ulang data...</span>';
-    setTimeout(() => {
-        document.getElementById("setupStatus").textContent = "";
-        loadOrders();
-        loadStats();
-        if (document.getElementById("panel-menu").classList.contains("active")) renderAdminMenu();
-    }, 500);
-}
-
-function changePassword() {
-    const np = document.getElementById("newPass").value;
-    const cp = document.getElementById("confirmPass").value;
-    const st = document.getElementById("passStatus");
-    if (!np) { st.innerHTML = '<span style="color:var(--red)">Password tidak boleh kosong</span>'; return; }
-    if (np !== cp) { st.innerHTML = '<span style="color:var(--red)">Password tidak cocok</span>'; return; }
-    localStorage.setItem("hn_admin_pass", np);
-    st.innerHTML = '<span style="color:var(--green)">✅ Password berhasil diganti!</span>';
-    document.getElementById("newPass").value = "";
-    document.getElementById("confirmPass").value = "";
-    setTimeout(() => st.textContent = "", 3000);
-}
-
-// ==================== CLOSE MODAL OUTSIDE CLICK ====================
-document.getElementById("menuModal").addEventListener("click", function(e) {
-    if (e.target === this) closeMenuModal();
-});
+function deleteMenuItem(id) { const item = getAllAdminItems().find(i => i.id === id); if (!item) return; if (!confirm(`Hapus "${item.name}"?`)) return; const arr = adminMenuData[item._cat]; const idx = arr.findIndex(i => i.id === id); if (idx !== -1) arr.splice(idx, 1); renderAdminMenu(); syncMenuToSheets(); }
+async function syncMenuToSheets() { if (!SCRIPT_URL) return; try { const allItems = getAllAdminItems().map(i => ({ category: i._cat, name: i.name, price: i.price, desc: i.desc, image: i.image, bestSeller: i.bestSeller })); await fetch(SCRIPT_URL, { method:"POST", headers:{"Content-Type":"text/plain"}, body: JSON.stringify({ action:"updateMenu", menu: allItems }) }); } catch(e) { console.warn("Sync menu error:", e); } }
+function saveSetup() { const url = document.getElementById("setupUrl").value.trim(); SCRIPT_URL = url; localStorage.setItem("hn_admin_url", url); document.getElementById("setupStatus").innerHTML = '<span style="color:var(--green)">✅ URL disimpan! Memuat ulang...</span>'; setTimeout(() => { document.getElementById("setupStatus").textContent = ""; loadOrders(); loadStats(); if (document.getElementById("panel-menu").classList.contains("active")) renderAdminMenu(); }, 500); }
+function changePassword() { const np = document.getElementById("newPass").value; const cp = document.getElementById("confirmPass").value; const st = document.getElementById("passStatus"); if (!np) { st.innerHTML = '<span style="color:var(--red)">Password tidak boleh kosong</span>'; return; } if (np !== cp) { st.innerHTML = '<span style="color:var(--red)">Password tidak cocok</span>'; return; } localStorage.setItem("hn_admin_pass", np); st.innerHTML = '<span style="color:var(--green)">✅ Password berhasil diganti!</span>'; document.getElementById("newPass").value = ""; document.getElementById("confirmPass").value = ""; setTimeout(() => st.textContent = "", 3000); }
+document.getElementById("menuModal").addEventListener("click", function(e) { if (e.target === this) closeMenuModal(); });
 </script>
 </body>
 </html>
