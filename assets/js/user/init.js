@@ -10,7 +10,7 @@ function applyDarkMode() {
     if (icon) icon.textContent = isDarkMode ? "☀️" : "🌙";
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+async function initApp() {
     applyDarkMode();
     tableNumber = getTableNumber();
     const tableDisplay = document.getElementById("tableDisplay");
@@ -21,14 +21,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadCartFromLocal();
     showSkeletonLoading();
     await loadMenuFromSheet();
-    renderMenu();
+    // Jika menu masih kosong setelah 2 detik, coba muat ulang
+    setTimeout(() => {
+        const items = getAllItems();
+        if (items.length === 0) {
+            console.warn("Menu still empty, retrying load...");
+            setDefaultMenu();
+            renderMenu();
+        }
+    }, 3000);
     if (activeOrderId) {
         await resumeActiveOrderIfNeeded();
     } else {
         const fab = document.getElementById("orderStatusFab");
         if (fab) fab.style.display = "none";
     }
-});
+}
+
+document.addEventListener("DOMContentLoaded", initApp);
 
 window.onclick = function(event) {
     const modal              = document.getElementById("modal");
