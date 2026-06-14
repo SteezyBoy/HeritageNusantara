@@ -18,16 +18,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         tableDisplay.textContent = tableNumber ? `🪑 Table ${tableNumber}` : "";
         tableDisplay.style.display = tableNumber ? "block" : "none";
     }
+
+    // === MIGRASI CART GUEST KE MEJA (tambahan untuk draft) ===
+    const oldCartKey = STORAGE_KEYS.cartPrefix + "guest";
+    const newCartKey = STORAGE_KEYS.cartPrefix + (tableNumber || "guest");
+    if (tableNumber && oldCartKey !== newCartKey) {
+        const guestCart = localStorage.getItem(oldCartKey);
+        if (guestCart && !localStorage.getItem(newCartKey)) {
+            localStorage.setItem(newCartKey, guestCart);
+            localStorage.removeItem(oldCartKey);
+            console.log("Cart migrated from guest to table", tableNumber);
+        }
+    }
     loadCartFromLocal();
 
-    // Tampilkan default menu dulu agar tidak kosong
-    setDefaultMenu();
-    renderMenu();
+    // Pastikan default menu terisi sebelum render pertama
+    setDefaultMenu();         // <- ini yang penting
+    renderMenu();             // render pertama dengan default
 
-    // Lalu coba load dari API (jika berhasil, menu akan di-refresh)
+    // Tampilkan skeleton lalu coba load dari API (jika berhasil, render ulang)
     showSkeletonLoading();
-    await loadMenuFromSheet();
-    renderMenu();
+    await loadMenuFromSheet(); // ini akan mengganti menuData jika API sukses
+    renderMenu();              // render ulang dengan data API (atau default jika gagal)
 
     if (activeOrderId) {
         await resumeActiveOrderIfNeeded();
