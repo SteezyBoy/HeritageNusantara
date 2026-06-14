@@ -1,11 +1,7 @@
-// ================================================================
-// HERITAGE NUSANTARA - User Menu
-// ================================================================
-
 async function loadMenuFromSheet() {
     const url = getAppsScriptUrl();
     if (!url || url === "PASTE_YOUR_APPS_SCRIPT_URL_HERE") {
-        console.warn("URL Apps Script belum diset, pakai menu default");
+        console.warn("Apps Script URL not set, using default menu");
         setDefaultMenu();
         return;
     }
@@ -24,7 +20,8 @@ async function loadMenuFromSheet() {
                     bestSeller: item.bestSeller === true,
                     image: item.image,
                     desc: item.desc,
-                    price: Number(item.price)
+                    price: Number(item.price),
+                    available: item.available !== false
                 });
             });
             menuData = newMenu;
@@ -32,7 +29,7 @@ async function loadMenuFromSheet() {
             setDefaultMenu();
         }
     } catch (err) {
-        console.error("Gagal mengambil menu dari Sheets, pakai default:", err);
+        console.error("Failed to load menu from Sheets, using default:", err);
         setDefaultMenu();
     }
 }
@@ -43,6 +40,7 @@ function setDefaultMenu() {
 
 function getFilteredAndSortedItems() {
     let items = currentCategory === "all" ? getAllItems() : [...menuData[currentCategory]];
+    items = items.filter(item => item.available !== false);
     if (currentSearchKeyword.trim() !== "") {
         items = items.filter(item => item.name.toLowerCase().includes(currentSearchKeyword.toLowerCase()));
     }
@@ -70,7 +68,8 @@ function renderMenu() {
         card.style.animationDelay = `${index * 0.06}s`;
         card.innerHTML = `
             <div class="image-wrapper">
-                ${item.bestSeller ? `<div class="best-seller">🔥 BEST SELLER</div>` : ''}                <img src="${item.image}" alt="${item.name}" loading="lazy" class="menu-img"
+                ${item.bestSeller ? `<div class="best-seller">🔥 BEST SELLER</div>` : ''}
+                <img src="${item.image}" alt="${item.name}" loading="lazy" class="menu-img"
                      onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22240%22><rect fill=%22%23f1f5f9%22 width=%22400%22 height=%22240%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🍽️</text></svg>'">
             </div>
             <div class="menu-info">
@@ -80,7 +79,7 @@ function renderMenu() {
                 <p>${item.desc.substring(0, 80)}${item.desc.length > 80 ? '...' : ''}</p>
                 <div class="card-actions">
                     <button class="detail-btn" onclick="openModalByName('${safeName}')">View Details</button>
-                    <button class="add-to-cart-btn" onclick="openQuickAddPopup('${safeName}')">+ Add To Cart</button>
+                    ${item.available !== false ? `<button class="add-to-cart-btn" onclick="openQuickAddPopup('${safeName}')">+ Add To Cart</button>` : '<button class="add-to-cart-btn" style="background:#64748b;cursor:not-allowed;" disabled>❌ Out of Stock</button>'}
                 </div>
             </div>`;
         menuList.appendChild(card);
@@ -104,15 +103,8 @@ function clearSearch() {
     renderMenu();
 }
 
-function searchMenu() {
-    currentSearchKeyword = document.getElementById("searchInput").value;
-    renderMenu();
-}
-
-function sortMenu() {
-    renderMenu();
-}
-
+function searchMenu() { currentSearchKeyword = document.getElementById("searchInput").value; renderMenu(); }
+function sortMenu() { renderMenu(); }
 function changeCategory(btn, category) {
     document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
