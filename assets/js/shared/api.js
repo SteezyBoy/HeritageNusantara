@@ -1,7 +1,3 @@
-// ================================================================
-// HERITAGE NUSANTARA - Shared API (Google Apps Script)
-// ================================================================
-
 function resolveScriptUrl() {
     if (typeof SCRIPT_URL !== "undefined" && SCRIPT_URL) return SCRIPT_URL;
     return getAppsScriptUrl();
@@ -40,5 +36,5 @@ async function syncMenuToApi(menuItems)      { return apiPost({ action: "updateM
 async function setPaymentMethodCashier(orderId) { return apiPost({ action: "setPaymentMethod", orderId, method: "kasir" }); }
 async function setPaymentMethodQris(orderId)    { return apiPost({ action: "setPaymentMethod", orderId, method: "qris" }); }
 async function markPaymentPaid(orderId)      { return apiPost({ action: "markPaymentPaid", orderId }); }
+async function finalizeQrisPayment(orderId)  { return apiPost({ action: "qrisPaymentFinal", orderId }); }
 async function getActiveOrderByTable(table)  { return apiGet("getActiveOrderByTable", { table }); }
-async function generateTableQr(table)        { return apiPost({ action: "generateTableQr", table }); }
