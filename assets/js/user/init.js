@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         tableDisplay.textContent = tableNumber ? `🪑 Table ${tableNumber}` : "";
         tableDisplay.style.display = tableNumber ? "block" : "none";
     }
-    
     loadCartFromLocal();
 
     // Tampilkan default menu dulu agar tidak kosong
