@@ -1,6 +1,6 @@
 // ================================================================
-// HERITAGE NUSANTARA - Google Apps Script  (v2.0)
-// New: addItemsToOrder, getActiveOrderByTable, status Diantar
+// HERITAGE NUSANTARA - Google Apps Script (v3.0)
+// Added: Available column, QRIS auto finalize, status flow update
 // ================================================================
 
 const SHEET_NAME_ORDERS = "Pesanan";
@@ -10,6 +10,10 @@ const ADMIN_PASSWORD    = "heritage2026";
 const ORDER_HEADERS = [
   "ID Pesanan","Waktu","No. Meja","Nama Item","Qty","Harga Satuan",
   "Subtotal","Catatan","Total Order","Status","Pembayaran"
+];
+
+const MENU_HEADERS = [
+  "Kategori","Nama","Harga","Deskripsi","Gambar","Best Seller","Available"
 ];
 
 function doPost(e) {
@@ -22,6 +26,7 @@ function doPost(e) {
     if (data.action === "deleteOrder")       return handleDeleteOrder(data);
     if (data.action === "setPaymentMethod")  return handleSetPaymentMethod(data);
     if (data.action === "markPaymentPaid")   return handleMarkPaymentPaid(data);
+    if (data.action === "qrisPaymentFinal")  return handleQrisPaymentFinal(data);
     return respond({ status: "error", message: "Unknown action" });
   } catch(err) {
     return respond({ status: "error", message: err.toString() });
@@ -42,7 +47,6 @@ function doGet(e) {
   }
 }
 
-// ── HELPERS ──────────────────────────────────────────────────────
 function respond(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
@@ -94,7 +98,6 @@ function handleAddItemsToOrder(data) {
   const orderId = data.orderId;
   const rows    = sheet.getDataRange().getValues();
 
-  // Recalculate total
   let existingTotal = 0;
   let tableNum = "-";
   let firstOrderRow = -1;
@@ -108,10 +111,8 @@ function handleAddItemsToOrder(data) {
   const addTotal = data.items.reduce((s, i) => s + i.price * i.qty, 0);
   const newTotal = existingTotal + addTotal;
 
-  // Update total on first row
   if (firstOrderRow > 0) sheet.getRange(firstOrderRow, 9).setValue(newTotal);
 
-  // Append new items
   const timestamp = new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
   data.items.forEach(item => {
     sheet.appendRow([
@@ -131,7 +132,6 @@ function handleAddItemsToOrder(data) {
 }
 
 // ── GET ACTIVE ORDER BY TABLE ─────────────────────────────────────
-// Mengembalikan orderId yang belum lunas untuk meja tertentu
 function handleGetActiveOrderByTable(e) {
   const table = e.parameter.table;
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME_ORDERS);
@@ -149,7 +149,6 @@ function handleGetActiveOrderByTable(e) {
     }
   }
   const ids = Object.keys(orderMap);
-  // Kembalikan order terakhir (terbaru) yang aktif
   return respond({ status: "ok", orderId: ids.length > 0 ? ids[ids.length - 1] : null });
 }
 
@@ -245,7 +244,6 @@ function handleGetStats(e) {
 }
 
 // ── UPDATE STATUS ────────────────────────────────────────────────
-// Status: Baru | Diproses | Diantar | Selesai
 function handleUpdateStatus(data) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME_ORDERS);
   if (!sheet) return respond({ status: "error", message: "Sheet not found" });
@@ -284,26 +282,43 @@ function handleSetPaymentMethod(data) {
   return respond({ status: "ok", paymentStatus: paymentValue });
 }
 
-// ── MARK PAYMENT PAID ────────────────────────────────────────────
-// Setelah lunas: reset semua data meja (kolom pembayaran jadi Lunas)
+// ── MARK PAYMENT PAID (CASH) ────────────────────────────────────
 function handleMarkPaymentPaid(data) {
   const sheet  = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME_ORDERS);
   if (!sheet) return respond({ status: "error", message: "Sheet not found" });
   const rows   = sheet.getDataRange().getValues();
   let found    = false;
-  let tableNum = null;
 
-  // Set order ini jadi Lunas
   for (let i = 1; i < rows.length; i++) {
     if (rows[i][0] === data.orderId) {
       sheet.getRange(i+1, 11).setValue("Lunas");
+      sheet.getRange(i+1, 9).setValue(rows[i][8]); // keep total
       sheet.getRange(i+1, 1, 1, ORDER_HEADERS.length).setBackground("#f0fdf4");
-      if (!tableNum) tableNum = rows[i][2];
       found = true;
     }
   }
   if (!found) return respond({ status: "error", message: "Order not found" });
   return respond({ status: "ok", paymentStatus: "Lunas" });
+}
+
+// ── QRIS PAYMENT FINAL (auto set status Selesai + Lunas) ─────────
+function handleQrisPaymentFinal(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME_ORDERS);
+  if (!sheet) return respond({ status: "error", message: "Sheet not found" });
+  const orderId = data.orderId;
+  const rows = sheet.getDataRange().getValues();
+  let found = false;
+
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === orderId) {
+      sheet.getRange(i+1, 10).setValue("Selesai");
+      sheet.getRange(i+1, 11).setValue("Lunas");
+      sheet.getRange(i+1, 1, 1, ORDER_HEADERS.length).setBackground("#dcfce7");
+      found = true;
+    }
+  }
+  if (!found) return respond({ status: "error", message: "Order not found" });
+  return respond({ status: "ok", paymentStatus: "Lunas", orderStatus: "Selesai" });
 }
 
 // ── DELETE ORDER ──────────────────────────────────────────────────
@@ -320,28 +335,29 @@ function handleDeleteOrder(data) {
   return respond({ status: "ok" });
 }
 
-// ── MENU HANDLERS ─────────────────────────────────────────────────
+// ── MENU HANDLERS (with Available column) ─────────────────────────
 function handleGetMenu(e) {
-  const sheet = getOrCreateSheet(SHEET_NAME_MENU,
-    ["Kategori","Nama","Harga","Deskripsi","Gambar","Best Seller"]);
+  const sheet = getOrCreateSheet(SHEET_NAME_MENU, MENU_HEADERS);
   const rows  = sheet.getDataRange().getValues();
   if (rows.length <= 1) return respond({ status: "ok", menu: [] });
-  const menu  = rows.slice(1).map(r => ({
+  const menu = rows.slice(1).map(r => ({
     category: r[0], name: r[1], price: Number(r[2]),
     desc: r[3], image: r[4],
-    bestSeller: r[5] === true || r[5] === "TRUE" || r[5] === "true"
+    bestSeller: r[5] === true || r[5] === "TRUE" || r[5] === "true",
+    available: (r[6] === undefined || r[6] === "" || r[6] === "TRUE" || r[6] === "true")
   }));
   return respond({ status: "ok", menu: menu });
 }
 
 function handleUpdateMenu(data) {
-  const sheet = getOrCreateSheet(SHEET_NAME_MENU,
-    ["Kategori","Nama","Harga","Deskripsi","Gambar","Best Seller"]);
+  const sheet = getOrCreateSheet(SHEET_NAME_MENU, MENU_HEADERS);
   if (sheet.getLastRow() > 1)
-    sheet.getRange(2, 1, sheet.getLastRow()-1, 6).clearContent();
+    sheet.getRange(2, 1, sheet.getLastRow()-1, 7).clearContent();
   const rows = data.menu.map(item => [
-    item.category, item.name, item.price, item.desc, item.image, item.bestSeller
+    item.category, item.name, item.price, item.desc, item.image,
+    item.bestSeller ? "TRUE" : "FALSE",
+    item.available !== false ? "TRUE" : "FALSE"
   ]);
-  if (rows.length > 0) sheet.getRange(2, 1, rows.length, 6).setValues(rows);
+  if (rows.length > 0) sheet.getRange(2, 1, rows.length, 7).setValues(rows);
   return respond({ status: "ok" });
 }
