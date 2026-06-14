@@ -1,7 +1,3 @@
-// ================================================================
-// HERITAGE NUSANTARA - User Modals (Detail & Quick Add)
-// ================================================================
-
 function openModalByName(itemName) {
     const items = getAllItems();
     currentItem = items.find(i => i.name === itemName);
@@ -78,6 +74,6 @@ function shareItem() {
     if (navigator.share) {
         navigator.share({ title: currentItem.name, text }).catch(() => {});
     } else {
-        navigator.clipboard.writeText(text).then(() => showShareToast("📋 Disalin ke clipboard!")).catch(() => {});
+        navigator.clipboard.writeText(text).then(() => showShareToast("📋 Copied to clipboard!")).catch(() => {});
     }
 }
