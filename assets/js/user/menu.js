@@ -55,13 +55,20 @@ async function loadMenuFromSheet() {
 }
 
 function setDefaultMenu() {
-    if (typeof DEFAULT_MENU_DATA !== "undefined") {
+    if (typeof DEFAULT_MENU_DATA !== "undefined" && DEFAULT_MENU_DATA) {
         menuData = JSON.parse(JSON.stringify(DEFAULT_MENU_DATA));
-        console.log("Default menu loaded:", menuData.makanan.length + menuData.minuman.length + menuData.dessert.length, "items");
+        console.log("Default menu loaded from DEFAULT_MENU_DATA:", menuData.makanan.length + menuData.minuman.length + menuData.dessert.length, "items");
     } else {
-        console.error("DEFAULT_MENU_DATA tidak tersedia!");
-        menuData = { makanan: [], minuman: [], dessert: [] };
+        console.warn("DEFAULT_MENU_DATA tidak tersedia, gunakan fallback dari state.js");
+        // Jika menuData masih kosong, gunakan fallback yang sudah ada di state.js (tidak perlu diubah)
+        if (!menuData.makanan.length && !menuData.minuman.length && !menuData.dessert.length) {
+            console.error("Menu data masih kosong, cek kembali file default-menu.js");
+        }
     }
+    // Pastikan semua item memiliki properti available (default true)
+    ["makanan", "minuman", "dessert"].forEach(cat => {
+        menuData[cat] = menuData[cat].map(item => ({ ...item, available: item.available !== false }));
+    });
 }
 
 function getFilteredAndSortedItems() {
