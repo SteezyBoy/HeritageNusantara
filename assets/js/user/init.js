@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         tableDisplay.style.display = tableNumber ? "block" : "none";
     }
     loadCartFromLocal();
+    setDefaultMenu();
     showSkeletonLoading();
     await loadMenuFromSheet();
     renderMenu();
