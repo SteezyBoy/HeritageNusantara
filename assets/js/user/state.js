@@ -33,31 +33,49 @@ function loadCartFromLocal() {
     const saved = localStorage.getItem(getCartKey());
 
     if (saved) {
+
         try {
+
             cart = JSON.parse(saved);
+
         } catch(e) {
+
+            console.error(e);
+
             cart = [];
+
         }
+
     }
 
-    const draft = localStorage.getItem("hn_order_draft");
+    const draft =
+        localStorage.getItem("hn_order_draft");
 
     if (draft) {
 
         try {
 
-            const data = JSON.parse(draft);
+            const data =
+                JSON.parse(draft);
 
-            if (Array.isArray(data.cart) && data.cart.length) {
+            if (
+                data.cart &&
+                Array.isArray(data.cart)
+            ) {
                 cart = data.cart;
             }
 
-            if (data.activeOrderId) {
-                activeOrderId = data.activeOrderId;
+            if (
+                data.activeOrderId
+            ) {
+                activeOrderId =
+                    data.activeOrderId;
             }
 
         } catch(err) {
+
             console.error(err);
+
         }
     }
 
