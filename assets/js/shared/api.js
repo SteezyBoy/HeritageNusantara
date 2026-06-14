@@ -1,0 +1,58 @@
+// ================================================================
+// HERITAGE NUSANTARA - Shared API (Google Apps Script)
+// ================================================================
+
+function resolveScriptUrl() {
+    if (typeof SCRIPT_URL !== "undefined" && SCRIPT_URL) return SCRIPT_URL;
+    return getAppsScriptUrl();
+}
+
+function getAdminScriptUrl() {
+    return resolveScriptUrl();
+}
+
+// Mobile-safe fetch: handles GAS redirect + CORS properly
+async function safeFetch(url, options = {}) {
+    // Try normal fetch first
+    try {
+        const res = await fetch(url, { ...options, redirect: "follow" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const text = await res.text();
+        return JSON.parse(text);
+    } catch (err) {
+        // Fallback: try with no-cors won't work for JSON, so try JSONP-style via URL rewrite
+        throw err;
+    }
+}
+
+async function apiGet(action, params = {}) {
+    const url = new URL(resolveScriptUrl());
+    url.searchParams.set("action", action);
+    Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
+    return safeFetch(url.toString());
+}
+
+async function apiPost(payload) {
+    const res = await fetch(resolveScriptUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload),
+        redirect: "follow"
+    });
+    return res.json();
+}
+
+async function fetchMenuFromApi()            { return apiGet("getMenu"); }
+async function fetchOrderById(orderId)       { return apiGet("getOrderById", { id: orderId }); }
+async function submitNewOrder(orderData)     { return apiPost({ action: "newOrder", ...orderData }); }
+async function addItemsToOrder(orderData)    { return apiPost({ action: "addItemsToOrder", ...orderData }); }
+async function fetchOrdersFromApi()          { return apiGet("getOrders"); }
+async function fetchStatsFromApi()           { return apiGet("getStats"); }
+async function updateOrderStatus(orderId, newStatus) { return apiPost({ action: "updateStatus", orderId, newStatus }); }
+async function deleteOrderFromApi(orderId)   { return apiPost({ action: "deleteOrder", orderId }); }
+async function syncMenuToApi(menuItems)      { return apiPost({ action: "updateMenu", menu: menuItems }); }
+async function setPaymentMethodCashier(orderId) { return apiPost({ action: "setPaymentMethod", orderId, method: "kasir" }); }
+async function setPaymentMethodQris(orderId)    { return apiPost({ action: "setPaymentMethod", orderId, method: "qris" }); }
+async function markPaymentPaid(orderId)      { return apiPost({ action: "markPaymentPaid", orderId }); }
+async function getActiveOrderByTable(table)  { return apiGet("getActiveOrderByTable", { table }); }
+async function generateTableQr(table)        { return apiPost({ action: "generateTableQr", table }); }
