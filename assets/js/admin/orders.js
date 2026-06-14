@@ -1,9 +1,3 @@
-// ================================================================
-// HERITAGE NUSANTARA - Admin Orders
-// Auto-refresh 15 detik, notif suara, group per meja
-// ================================================================
-
-// ── BEEP NOTIFIKASI ──────────────────────────────────────────────
 function playNewOrderBeep() {
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -21,44 +15,35 @@ function playNewOrderBeep() {
     } catch(e) {}
 }
 
-// ── LOAD & RENDER ────────────────────────────────────────────────
 async function loadOrders(silent = false) {
     if (!silent) document.getElementById("orders-list").innerHTML = '<div class="loading-spin"></div>';
     const url = getAdminScriptUrl();
     if (!url) {
         document.getElementById("orders-list").innerHTML =
-            '<div class="empty-msg"><div class="em-icon">⚙️</div><p>Masukkan URL Apps Script di tab <strong>Setup</strong> dulu</p></div>';
+            '<div class="empty-msg"><div class="em-icon">⚙️</div><p>Enter Apps Script URL in <strong>Setup</strong> tab first</p></div>';
         return;
     }
-    if (typeof SCRIPT_URL !== "undefined" && !SCRIPT_URL) SCRIPT_URL = url;
     try {
         const data = await fetchOrdersFromApi();
-        if (data.status && data.status !== "ok") throw new Error(data.message || "Respons API tidak valid");
-
+        if (data.status && data.status !== "ok") throw new Error(data.message || "Invalid API response");
         const newOrders = data.orders || [];
-
-        // Deteksi pesanan baru → mainkan beep
         const newIds = new Set(newOrders.map(o => o.id));
         let hasNew = false;
         newIds.forEach(id => { if (!lastOrderIds.has(id)) hasNew = true; });
         if (hasNew && lastOrderIds.size > 0) playNewOrderBeep();
         lastOrderIds = newIds;
-
         currentOrders = newOrders;
-
         const newCount = currentOrders.filter(o => normalizeOrderStatus(o.status) === "Baru").length;
-        const badge    = document.getElementById("newOrderBadge");
+        const badge = document.getElementById("newOrderBadge");
         if (newCount > 0) { badge.style.display = "inline-block"; badge.textContent = newCount; }
-        else               { badge.style.display = "none"; }
-
+        else badge.style.display = "none";
         renderOrders();
-        document.getElementById("lastRefreshTime").textContent =
-            "Terakhir diperbarui: " + new Date().toLocaleTimeString("id-ID");
+        document.getElementById("lastRefreshTime").textContent = "Last updated: " + new Date().toLocaleTimeString("en-US");
     } catch (e) {
         console.error("loadOrders error:", e);
         if (!silent && currentOrders.length === 0)
             document.getElementById("orders-list").innerHTML =
-                '<div class="empty-msg"><div class="em-icon">❌</div><p>Gagal memuat pesanan. Periksa URL Apps Script.</p></div>';
+                '<div class="empty-msg"><div class="em-icon">❌</div><p>Failed to load orders. Check Apps Script URL.</p></div>';
         else if (!silent) renderOrders();
     }
 }
@@ -70,113 +55,75 @@ function filterOrders(status, btn) {
     renderOrders();
 }
 
-// ── RENDER ORDERS GROUPED BY TABLE ──────────────────────────────
 function renderOrders() {
     const list = document.getElementById("orders-list");
     let filtered = currentFilter === "semua"
         ? currentOrders
         : currentOrders.filter(o => normalizeOrderStatus(o.status) === currentFilter);
-
-    // Filter tambahan: bayar dikasir / qris
     if (currentFilter === "kasir")
         filtered = currentOrders.filter(o => (o.paymentStatus || "").includes("Kasir"));
     if (currentFilter === "qris")
         filtered = currentOrders.filter(o => (o.paymentStatus || "").includes("QRIS") || (o.paymentStatus || "").includes("Qris"));
-
     if (filtered.length === 0) {
-        list.innerHTML = '<div class="empty-msg"><div class="em-icon">📋</div><p>Tidak ada pesanan</p></div>';
+        list.innerHTML = '<div class="empty-msg"><div class="em-icon">📋</div><p>No orders found</p></div>';
         return;
     }
-
-    // Group by table
     const tableGroups = {};
-    filtered.forEach(order => {
-        const t = order.table || "—";
-        if (!tableGroups[t]) tableGroups[t] = [];
-        tableGroups[t].push(order);
-    });
-
+    filtered.forEach(order => { const t = order.table || "—"; if (!tableGroups[t]) tableGroups[t] = []; tableGroups[t].push(order); });
     let html = "";
     Object.entries(tableGroups).forEach(([table, orders]) => {
-        // Cek apakah ada yang belum lunas di meja ini
         const hasUnpaid = orders.some(o => o.paymentStatus !== "Lunas");
-        html += `<div class="table-group">
-            <div class="table-group-header">
-                <span>🪑 Meja ${table}</span>
-                ${hasUnpaid ? '<span class="table-unpaid-dot">Menunggu Bayar</span>' : '<span class="table-paid-dot">Lunas</span>'}
-            </div>`;
-        orders.forEach(order => {
-            try { html += buildOrderCardHtml(order); } catch(err) { console.warn("Skip order card:", order.id, err); }
-        });
+        html += `<div class="table-group"><div class="table-group-header"><span>🪑 Table ${table}</span>${hasUnpaid ? '<span class="table-unpaid-dot">Awaiting Payment</span>' : '<span class="table-paid-dot">Paid</span>'}</div>`;
+        orders.forEach(order => { html += buildOrderCardHtml(order); });
         html += `</div>`;
     });
-
     list.innerHTML = html;
 }
 
-// ── BUILD SINGLE ORDER CARD ──────────────────────────────────────
 function buildOrderCardHtml(order) {
-    const safeId       = escapeJsString(order.id);
-    const statusText   = normalizeOrderStatus(order.status);
-    const statusClass  = statusText.toLowerCase().replace(/ /g, "");
-    const badgeClass   = "badge-" + statusClass;
-    const ps           = order.paymentStatus || "-";
-
-    // Badge pembayaran
+    const safeId = escapeJsString(order.id);
+    const statusText = normalizeOrderStatus(order.status);
+    const statusClass = statusText.toLowerCase().replace(/ /g, "");
+    const ps = order.paymentStatus || "-";
     let paymentBadge = "";
-    if (ps === "Menunggu Kasir")
-        paymentBadge = '<span class="order-badge badge-kasir">💰 Bayar di Kasir</span>';
-    else if (ps === "Menunggu QRIS" || ps === "Menunggu Qris")
-        paymentBadge = '<span class="order-badge badge-qris">📱 QRIS</span>';
-    else if (ps === "Lunas")
-        paymentBadge = '<span class="order-badge badge-selesai">✅ Lunas</span>';
-
-    // Tampilkan items — catatan terpisah jika notes berbeda
+    if (ps === "Menunggu Kasir") paymentBadge = '<span class="order-badge badge-kasir">💰 Pay at Cashier</span>';
+    else if (ps === "Menunggu QRIS") paymentBadge = '<span class="order-badge badge-qris">📱 QRIS</span>';
+    else if (ps === "Lunas") paymentBadge = '<span class="order-badge badge-selesai">✅ Paid</span>';
     const itemsHtml = (order.items || []).map(it => `
         <div class="order-item-row">
             <span>${it.qty}× ${it.name} ${it.notes && it.notes !== "-" ? `<em class="note">(${it.notes})</em>` : ""}</span>
             <span>${fmt(it.subtotal)}</span>
             <span class="item-status-small ${getItemStatusClass(it.status)}">${getItemStatusLabel(it.status)}</span>
         </div>`).join("");
-
-    // Tombol aksi
-    const paidBtn   = ps === "Menunggu Kasir"
-        ? `<button class="action-btn btn-selesai" onclick="markOrderPaid('${safeId}')">💵 Sudah Bayar</button>` : "";
-    const diantarBtn = statusText !== "Diantar" && statusText !== "Selesai"
-        ? `<button class="action-btn btn-diantar" onclick="updateStatus('${safeId}','Diantar')">🛵 Sudah Diantar</button>` : "";
-
-    return `
-    <div class="order-card status-${statusClass}">
+    let actionButtons = "";
+    if (statusText === "Baru") {
+        actionButtons = `<button class="action-btn btn-proses" onclick="updateStatus('${safeId}','Diproses')">🍳 Process</button>
+                         <button class="action-btn btn-hapus" onclick="deleteOrder('${safeId}')">🗑 Delete</button>`;
+    } else if (statusText === "Diproses") {
+        actionButtons = `<button class="action-btn btn-diantar" onclick="updateStatus('${safeId}','Diantar')">🛵 Deliver</button>
+                         <button class="action-btn btn-hapus" onclick="deleteOrder('${safeId}')">🗑 Delete</button>`;
+    } else if (statusText === "Diantar") {
+        let paidBtn = (ps === "Menunggu Kasir") ? `<button class="action-btn btn-selesai" onclick="markOrderPaid('${safeId}')">💵 Paid</button>` : "";
+        actionButtons = `${paidBtn}<button class="action-btn btn-hapus" onclick="deleteOrder('${safeId}')">🗑 Delete</button>`;
+    } else if (statusText === "Selesai") {
+        actionButtons = `<button class="action-btn btn-hapus" onclick="deleteOrder('${safeId}')">🗑 Delete</button>`;
+    }
+    return `<div class="order-card status-${statusClass}">
         <div class="order-header">
-            <div>
-                <div class="order-id">${order.id}</div>
-                <div class="order-meta">🕐 ${order.time}</div>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;">
-                <span class="order-badge ${badgeClass}">${statusText}</span>
-                ${paymentBadge}
-            </div>
+            <div><div class="order-id">${order.id}</div><div class="order-meta">🕐 ${order.time}</div></div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="order-badge badge-${statusClass}">${statusText}</span>${paymentBadge}</div>
         </div>
-        <div class="order-items">
-            ${itemsHtml}
-            <div class="order-total-row"><span>Total</span><span>${fmt(order.total)}</span></div>
-        </div>
-        <div class="order-actions">
-            <button class="action-btn btn-proses"  onclick="updateStatus('${safeId}','Diproses')">🍳 Diproses</button>
-            ${diantarBtn}
-            <button class="action-btn btn-selesai" onclick="updateStatus('${safeId}','Selesai')">✅ Selesai</button>
-            ${paidBtn}
-            <button class="action-btn btn-hapus"   onclick="deleteOrder('${safeId}')">🗑 Hapus</button>
-        </div>
+        <div class="order-items">${itemsHtml}<div class="order-total-row"><span>Total</span><span>${fmt(order.total)}</span></div></div>
+        <div class="order-actions">${actionButtons}</div>
     </div>`;
 }
 
 function getItemStatusLabel(s) {
     s = (s || "").toLowerCase();
-    if (s === "diproses") return "🍳 Diproses";
-    if (s === "diantar")  return "🛵 Diantar";
-    if (s === "selesai")  return "✅ Selesai";
-    return "⏳ Baru";
+    if (s === "diproses") return "🍳 Cooking";
+    if (s === "diantar")  return "🛵 Delivered";
+    if (s === "selesai")  return "✅ Done";
+    return "⏳ New";
 }
 function getItemStatusClass(s) {
     s = (s || "").toLowerCase();
@@ -186,45 +133,42 @@ function getItemStatusClass(s) {
     return "iss-baru";
 }
 
-// ── ACTIONS ─────────────────────────────────────────────────────
 async function updateStatus(orderId, newStatus) {
-    if (!getAdminScriptUrl()) { alert("Set URL Apps Script dulu di tab Setup!"); return; }
+    if (!getAdminScriptUrl()) { alert("Set Apps Script URL in Setup tab first!"); return; }
     try {
         await updateOrderStatus(orderId, newStatus);
         const o = currentOrders.find(x => x.id === orderId);
         if (o) o.status = newStatus;
         renderOrders();
         loadStats();
-    } catch (e) { alert("Gagal update status: " + e.message); }
+    } catch (e) { alert("Failed to update status: " + e.message); }
 }
 
 async function markOrderPaid(orderId) {
-    if (!getAdminScriptUrl()) { alert("URL Apps Script belum diset!"); return; }
-    if (!confirm(`Tandai pesanan ${orderId} sudah dibayar di kasir?`)) return;
+    if (!getAdminScriptUrl()) { alert("Apps Script URL not set!"); return; }
+    if (!confirm(`Confirm payment for order ${orderId}?`)) return;
     try {
         const result = await markPaymentPaid(orderId);
         if (result.status === "ok") {
             const o = currentOrders.find(x => x.id === orderId);
-            if (o) o.paymentStatus = "Lunas";
+            if (o) { o.paymentStatus = "Lunas"; o.status = "Selesai"; }
             renderOrders();
-            showAdminToast("✅ Pembayaran dikonfirmasi!");
-        } else {
-            alert("❌ Gagal: " + (result.message || "Unknown error"));
-        }
+            showAdminToast("✅ Payment confirmed!");
+        } else alert("❌ Failed: " + (result.message || "Unknown error"));
     } catch (e) { alert("❌ Error: " + e.message); }
 }
 
 async function deleteOrder(orderId) {
-    if (!confirm(`Hapus pesanan ${orderId}?`)) return;
-    if (!getAdminScriptUrl()) { alert("URL Apps Script belum diset!"); return; }
+    if (!confirm(`Delete order ${orderId}?`)) return;
+    if (!getAdminScriptUrl()) { alert("Apps Script URL not set!"); return; }
     try {
         const result = await deleteOrderFromApi(orderId);
         if (result.status === "ok") {
             currentOrders = currentOrders.filter(o => o.id !== orderId);
             renderOrders();
             loadStats();
-            showAdminToast("✅ Pesanan dihapus.");
-        } else { alert("❌ Gagal menghapus: " + (result.message || "Unknown error")); }
+            showAdminToast("✅ Order deleted.");
+        } else alert("❌ Failed to delete: " + (result.message || "Unknown error"));
     } catch (e) { alert("❌ Error: " + e.message); }
 }
 
@@ -241,32 +185,20 @@ function showAdminToast(msg) {
     setTimeout(() => { t.style.opacity = "0"; }, 2500);
 }
 
-// ── QR CODE GENERATOR ────────────────────────────────────────────
-function openQrGenerator() {
-    document.getElementById("qrModal").style.display = "flex";
-    document.getElementById("qrTableInput").value = "";
-    document.getElementById("qrResult").innerHTML = "";
-}
-function closeQrModal() {
-    document.getElementById("qrModal").style.display = "none";
-}
-
 function generateQrCode() {
     const table = document.getElementById("qrTableInput").value.trim();
-    if (!table) { showAdminToast("⚠️ Masukkan nomor meja dulu!"); return; }
+    if (!table) { showAdminToast("⚠️ Enter table number first!"); return; }
     const baseUrl = window.location.origin + window.location.pathname.replace("admin.html","index.html");
     const qrUrl   = `${baseUrl}?table=${encodeURIComponent(table)}`;
     const container = document.getElementById("qrResult");
     container.innerHTML = `
         <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">URL: <a href="${qrUrl}" target="_blank" style="color:var(--accent);word-break:break-all;">${qrUrl}</a></p>
         <div id="qrcode-display" style="display:flex;justify-content:center;margin:12px 0;"></div>
-        <p style="font-size:12px;color:var(--muted);text-align:center;">Scan QR ini untuk Meja ${table}</p>
+        <p style="font-size:12px;color:var(--muted);text-align:center;">Scan this QR for Table ${table}</p>
         <button class="add-menu-btn" style="width:100%;margin-top:10px;" onclick="printQrCode('${escapeJsString(table)}','${escapeJsString(qrUrl)}')">🖨️ Print QR Code</button>`;
-
-    // Render QR via Google Charts API (no JS lib needed)
     const img = document.createElement("img");
     img.src   = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
-    img.alt   = `QR Meja ${table}`;
+    img.alt   = `QR Table ${table}`;
     img.style.cssText = "width:200px;height:200px;border-radius:12px;border:3px solid var(--accent);";
     document.getElementById("qrcode-display").appendChild(img);
 }
@@ -274,15 +206,14 @@ function generateQrCode() {
 function printQrCode(table, url) {
     const win = window.open("","_blank");
     const imgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
-    win.document.write(`<!DOCTYPE html><html><head><title>QR Meja ${table}</title>
+    win.document.write(`<!DOCTYPE html><html><head><title>QR Table ${table}</title>
     <style>body{font-family:sans-serif;text-align:center;padding:40px;}h2{color:#ff5400;}img{border:3px solid #ff5400;border-radius:12px;}p{color:#64748b;font-size:14px;}</style></head>
-    <body><h2>Heritage Nusantara</h2><h3>🪑 Meja ${table}</h3>
-    <img src="${imgUrl}" alt="QR"><p>Scan untuk memesan</p><p style="font-size:11px;color:#94a3b8;">${url}</p>
+    <body><h2>Heritage Nusantara</h2><h3>🪑 Table ${table}</h3>
+    <img src="${imgUrl}" alt="QR"><p>Scan to order</p><p style="font-size:11px;color:#94a3b8;">${url}</p>
     <script>window.onload=()=>window.print();<\/script></body></html>`);
     win.document.close();
 }
 
-// Auto refresh 15 detik
 function startAutoRefresh() {
     if (autoRefreshTimer) clearInterval(autoRefreshTimer);
     autoRefreshTimer = setInterval(() => loadOrders(true), 15000);
