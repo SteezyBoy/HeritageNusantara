@@ -55,13 +55,41 @@ async function loadMenuFromSheet() {
 }
 
 function setDefaultMenu() {
-    if (typeof DEFAULT_MENU_DATA !== "undefined") {
+    // Coba gunakan DEFAULT_MENU_DATA jika ada
+    if (typeof DEFAULT_MENU_DATA !== "undefined" && DEFAULT_MENU_DATA && Object.keys(DEFAULT_MENU_DATA).length > 0) {
         menuData = JSON.parse(JSON.stringify(DEFAULT_MENU_DATA));
-        console.log("Default menu loaded:", menuData.makanan.length + menuData.minuman.length + menuData.dessert.length, "items");
-    } else {
-        console.error("DEFAULT_MENU_DATA tidak tersedia!");
-        menuData = { makanan: [], minuman: [], dessert: [] };
+        console.log("Default menu loaded from DEFAULT_MENU_DATA");
+    } 
+    // Jika tidak, gunakan FALLBACK_MENU yang sudah didefinisikan di state.js
+    else if (typeof FALLBACK_MENU !== "undefined" && FALLBACK_MENU) {
+        menuData = JSON.parse(JSON.stringify(FALLBACK_MENU));
+        console.log("Default menu loaded from FALLBACK_MENU (state.js)");
     }
+    else {
+        // Fallback terakhir (hardcoded) – jaga-jaga jika kedua variabel tidak ada
+        console.error("No menu data source available, using emergency fallback");
+        menuData = {
+            makanan: [
+                { name: "Tahu Isi Goreng", category: "Appetizer", bestSeller: true, image: "images/TAHU ISI GORENG.jpeg", desc: "Tahu renyah", price: 35000, available: true },
+                { name: "Nasi Goreng", category: "Main Course", bestSeller: true, image: "images/NASI GORENG KAMPUNG.jpeg", desc: "Nasi goreng spesial", price: 75000, available: true }
+            ],
+            minuman: [
+                { name: "Es Teh", category: "Beverage", bestSeller: false, image: "images/ES TEH.jpeg", desc: "Teh manis dingin", price: 25000, available: true }
+            ],
+            dessert: [
+                { name: "Klepon", category: "Dessert", bestSeller: true, image: "images/KLEPON.jpeg", desc: "Klepon kelapa", price: 30000, available: true }
+            ]
+        };
+    }
+
+    // Pastikan semua item memiliki properti available (default true)
+    ["makanan", "minuman", "dessert"].forEach(cat => {
+        if (menuData[cat]) {
+            menuData[cat] = menuData[cat].map(item => ({ ...item, available: item.available !== false }));
+        } else {
+            menuData[cat] = [];
+        }
+    });
 }
 
 function getFilteredAndSortedItems() {
