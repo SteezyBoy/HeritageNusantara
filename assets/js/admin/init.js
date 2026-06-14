@@ -1,7 +1,3 @@
-// ================================================================
-// HERITAGE NUSANTARA - Admin Init
-// ================================================================
-
 function toggleAdminDark() {
     adminDark = !adminDark;
     localStorage.setItem(STORAGE_KEYS.adminDark, adminDark);
@@ -19,7 +15,6 @@ function switchTab(name, btn) {
     btn.classList.add("active");
     if (name === "menu")   renderAdminMenu();
     if (name === "stats")  loadStats();
-    if (name === "qr")     { /* QR panel active */ }
 }
 
 function saveSetup() {
@@ -27,7 +22,7 @@ function saveSetup() {
     SCRIPT_URL = url;
     localStorage.setItem(STORAGE_KEYS.adminUrl, url);
     document.getElementById("setupStatus").innerHTML =
-        '<span style="color:var(--green)">✅ URL berhasil disimpan!</span>';
+        '<span style="color:var(--green)">✅ URL saved successfully!</span>';
     setTimeout(() => { document.getElementById("setupStatus").textContent = ""; loadOrders(); loadStats(); }, 1500);
 }
 
@@ -39,9 +34,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("menuModal").addEventListener("click", function(e) {
         if (e.target === this) closeMenuModal();
-    });
-    const qrModal = document.getElementById("qrModal");
-    if (qrModal) qrModal.addEventListener("click", function(e) {
-        if (e.target === this) closeQrModal();
     });
 });
