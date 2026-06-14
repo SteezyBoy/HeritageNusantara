@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -9,15 +9,13 @@
 </head>
 <body>
 
-<!-- ===== SUCCESS POPUP ===== -->
 <div id="success-popup" class="success-popup">
     <div class="popup-content">
         <div class="checkmark">✓</div>
-        <p>Successfully added to cart!</p>
+        <p>Added to cart!</p>
     </div>
 </div>
 
-<!-- ===== QUICK ADD MODAL ===== -->
 <div id="quickAddModal" class="quick-add-modal">
     <div class="quick-add-content">
         <span class="close-quick" onclick="closeQuickAddModal()">&times;</span>
@@ -28,7 +26,7 @@
             <span id="quickQty">1</span>
             <button onclick="increaseQuickQty()">+</button>
         </div>
-        <textarea id="quickNotes" placeholder="Catatan khusus (opsional)..."></textarea>
+        <textarea id="quickNotes" placeholder="Special notes (optional)..."></textarea>
         <button class="order-btn" onclick="confirmQuickAdd()">Add To Cart</button>
     </div>
 </div>
@@ -41,9 +39,8 @@
                 <span id="darkmodeIcon">🌙</span>
             </button>
         </div>
-        <!-- Order Status FAB + Cart — sama ukuran, sama warna -->
         <div class="fab-row" id="fabRow">
-            <button class="fab-btn" id="orderStatusFab" onclick="openOrderStatus()" title="Status Pesanan" style="display:none;">
+            <button class="fab-btn" id="orderStatusFab" onclick="openOrderStatus()" title="Order Status" style="display:none;">
                 📋<span id="status-dot" class="status-dot" style="display:none;"></span>
             </button>
             <button class="fab-btn" id="cartIconBtn" onclick="openCart()">
@@ -53,7 +50,6 @@
         <div class="logo-circle">🍃</div>
         <h1 class="restaurant-name">Heritage Nusantara</h1>
         <p class="restaurant-tagline">Authentic Indonesian Cuisine</p>
-        <!-- Nomor meja dari QR -->
         <div id="tableDisplay" class="table-display" style="display:none;"></div>
         <div class="header-info">🍽 Signature Menu • 🌶 Indonesian Spices • ⭐ Premium Quality</div>
     </header>
@@ -92,7 +88,7 @@
     </footer>
 </div>
 
-<!-- ===== MODAL DETAIL ===== -->
+<!-- MODAL DETAIL -->
 <div id="modal" class="modal">
     <div class="modal-container">
         <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -113,19 +109,19 @@
                     <span id="modal-qty">1</span>
                     <button class="qty-control" onclick="increaseModalQty()">+</button>
                 </div>
-                <textarea id="modal-notes" placeholder="Catatan khusus untuk menu ini (opsional)..."></textarea>
+                <textarea id="modal-notes" placeholder="Special notes for this item (optional)..."></textarea>
                 <button class="modal-add-btn" onclick="addToCartFromModal()">Add To Cart</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ===== CART / ORDER MODAL ===== -->
+<!-- CART / ORDER MODAL -->
 <div id="cartModal" class="cart-modal">
     <div class="cart-content">
         <span class="close" onclick="closeCart()">×</span>
 
-        <!-- Screen 1: Cart -->
+        <!-- Cart Screen -->
         <div id="cart-screen">
             <h2>🛒 Your Cart</h2>
             <div id="cart-items"></div>
@@ -143,9 +139,9 @@
             </div>
         </div>
 
-        <!-- Screen 2: Order Review (tanpa input meja) -->
+        <!-- Order Review -->
         <div id="order-summary-screen" style="display:none;">
-            <h2>📋 Review Pesanan</h2>
+            <h2>📋 Review Order</h2>
             <div id="summary-table-display" class="summary-table-info"></div>
             <div id="order-summary-items"></div>
             <div class="order-summary-total">
@@ -159,22 +155,22 @@
             </div>
         </div>
 
-        <!-- Screen 3: Status Order -->
+        <!-- Order Status Screen -->
         <div id="order-status-screen" style="display:none;">
-            <h2>📊 Status Pesanan</h2>
+            <h2>📊 Order Status</h2>
             <div id="status-order-id" style="font-size:12px;text-align:center;color:var(--muted);margin-bottom:10px;"></div>
             <div id="status-items-list"></div>
             <div class="order-summary-total" style="margin:10px 0;">
-                <span>Total Tagihan</span>
+                <span>Total Bill</span>
                 <span id="status-total">Rp 0</span>
             </div>
             <div class="summary-btn-row">
-                <button class="back-btn" onclick="closeOrderStatus()">Tutup</button>
-                <button id="statusPayBtn" class="checkout-btn" style="display:none;" onclick="showPaymentOptions()">💳 Bayar Sekarang</button>
+                <button class="back-btn" onclick="closeOrderStatus()">Close</button>
+                <button id="statusPayBtn" class="checkout-btn" style="display:none;" onclick="showPaymentOptions()">💳 Pay Now</button>
             </div>
         </div>
 
-        <!-- Screen 4: QRIS Payment -->
+        <!-- QRIS Payment Screen -->
         <div id="payment-screen" style="display:none;">
             <h2>💳 QRIS Payment</h2>
             <div class="payment-info-box">
@@ -188,38 +184,50 @@
                 </div>
             </div>
             <div id="payOrderId" style="text-align:center;font-size:14px;margin-bottom:10px;color:var(--green);font-weight:600;min-height:22px;"></div>
-            <p class="qris-note">Scan QR code di atas menggunakan mobile banking atau e-wallet</p>
+            <p class="qris-note">Scan QR code using mobile banking or e-wallet</p>
             <button class="checkout-btn" style="background:#64748b;margin-top:12px;" onclick="backToOrderStatus()">← Back</button>
-            <button class="checkout-btn" style="background:linear-gradient(135deg,var(--green),var(--green2));margin-top:12px;" onclick="finalizePaymentAndClose()">✅ Selesai & Tutup Bill</button>
+            <button class="checkout-btn" style="background:linear-gradient(135deg,var(--green),var(--green2));margin-top:12px;" onclick="finalizeQrisPayment()">✅ Confirm & Close Bill</button>
         </div>
 
-        <!-- Screen 5: Cashier Wait -->
+        <!-- Cashier Wait Screen -->
         <div id="cashier-wait-screen" style="display:none;">
-            <h2>💰 Bayar ke Kasir</h2>
+            <h2>💰 Pay at Cashier</h2>
             <div class="payment-info-box">
                 <div id="cashierWaitOrderId" style="font-size:14px;color:var(--text-muted);margin-bottom:8px;"></div>
-                <div style="font-size:15px;color:var(--text-secondary);margin-bottom:6px;">Total Tagihan</div>
+                <div style="font-size:15px;color:var(--text-secondary);margin-bottom:6px;">Total Bill</div>
                 <div id="cashierWaitTotal" style="font-size:24px;font-weight:800;color:var(--accent);margin-bottom:12px;"></div>
                 <div id="cashierWaitStatus" style="font-size:14px;color:var(--text-muted);line-height:1.6;padding:12px;background:var(--surface2);border-radius:12px;"></div>
             </div>
-            <p class="qris-note">Silakan lakukan pembayaran ke kasir. Halaman ini otomatis selesai setelah kasir menekan <strong>Sudah Bayar</strong>.</p>
-            <button class="checkout-btn" style="background:#64748b;margin-top:12px;" onclick="closeCashierWaitScreen()">Tutup (tetap menunggu)</button>
+            <p class="qris-note">Please make payment at the cashier. This page will auto-close once cashier confirms payment.</p>
+            <button class="checkout-btn" style="background:#64748b;margin-top:12px;" onclick="closeCashierWaitScreen()">Close (still waiting)</button>
         </div>
 
+        <!-- Review Before Payment Modal (inside cart) -->
+        <div id="review-payment-screen" style="display:none;">
+            <h2>💰 Review All Orders</h2>
+            <div id="reviewPaymentItems"></div>
+            <div class="order-summary-total">
+                <span>Total</span>
+                <span id="reviewPaymentTotal"></span>
+            </div>
+            <div class="summary-btn-row">
+                <button class="back-btn" onclick="hideReviewPayment()">← Back</button>
+                <button class="checkout-btn" onclick="proceedToPaymentChoice()">💳 Continue to Payment</button>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- ===== PILIHAN PEMBAYARAN ===== -->
+<!-- Payment Choice Modal -->
 <div id="paymentChoiceModal" class="payment-choice-modal">
     <div class="payment-choice-content">
-        <h3>💳 Pilih Metode Pembayaran</h3>
-        <button class="payment-choice-btn qris"    onclick="payWithQRIS()">📱 Bayar via QRIS</button>
-        <button class="payment-choice-btn cashier" onclick="payWithCashier()">💰 Bayar ke Kasir</button>
-        <button class="payment-choice-btn cancel"  onclick="closePaymentChoiceModal()">Batal</button>
+        <h3>💳 Select Payment Method</h3>
+        <button class="payment-choice-btn qris"    onclick="payWithQRIS()">📱 Pay via QRIS</button>
+        <button class="payment-choice-btn cashier" onclick="payWithCashier()">💰 Pay at Cashier</button>
+        <button class="payment-choice-btn cancel"  onclick="closePaymentChoiceModal()">Cancel</button>
     </div>
 </div>
 
-<!-- ===== SHARE TOAST ===== -->
 <div id="shareToast" class="share-toast"></div>
 
 <script src="assets/js/shared/config.js"></script>
