@@ -1,9 +1,4 @@
-// ================================================================
-// HERITAGE NUSANTARA - Shared Config
-// ================================================================
-
-const APPS_SCRIPT_FALLBACK_URL =
-    "https://script.google.com/macros/s/AKfycbyljbjiNuBEKBVteHQNVjFIFTsfc31e7f6lPVDmWfGcg5dg2VRiYv4OGvtV5rnmCaJp2g/exec";
+const APPS_SCRIPT_FALLBACK_URL = "https://script.google.com/macros/s/AKfycbyljbjiNuBEKBVteHQNVjFIFTsfc31e7f6lPVDmWfGcg5dg2VRiYv4OGvtV5rnmCaJp2g/exec";
 
 const STORAGE_KEYS = {
     adminUrl:      "hn_admin_url",
@@ -12,14 +7,14 @@ const STORAGE_KEYS = {
     adminDark:     "hn_admin_dark",
     darkMode:      "hn_darkmode",
     activeOrderId: "hn_active_order_id",
-    tableNumber:   "hn_table_number"
+    tableNumber:   "hn_table_number",
+    cartPrefix:    "hn_cart_"
 };
 
 function getAppsScriptUrl() {
     return localStorage.getItem(STORAGE_KEYS.adminUrl) || APPS_SCRIPT_FALLBACK_URL;
 }
 
-// Ambil nomor meja dari URL param ?table=X (prioritas) atau localStorage
 function getTableNumber() {
     const params = new URLSearchParams(window.location.search);
     const fromUrl = params.get("table");
