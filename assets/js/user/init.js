@@ -1,7 +1,3 @@
-// ================================================================
-// HERITAGE NUSANTARA - User Init
-// ================================================================
-
 function toggleDarkMode() {
     isDarkMode = !isDarkMode;
     localStorage.setItem(STORAGE_KEYS.darkMode, isDarkMode);
@@ -16,22 +12,16 @@ function applyDarkMode() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     applyDarkMode();
-
-    // Ambil nomor meja dari URL param
     tableNumber = getTableNumber();
-
-    // Tampilkan nomor meja di header
     const tableDisplay = document.getElementById("tableDisplay");
     if (tableDisplay) {
-        tableDisplay.textContent = tableNumber ? `🪑 Meja ${tableNumber}` : "";
+        tableDisplay.textContent = tableNumber ? `🪑 Table ${tableNumber}` : "";
         tableDisplay.style.display = tableNumber ? "block" : "none";
     }
-
+    loadCartFromLocal();
     showSkeletonLoading();
     await loadMenuFromSheet();
     renderMenu();
-
-    // Resume active order jika ada
     if (activeOrderId) {
         await resumeActiveOrderIfNeeded();
     } else {
