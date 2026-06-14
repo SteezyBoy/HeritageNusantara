@@ -1,7 +1,3 @@
-// ================================================================
-// HERITAGE NUSANTARA - Shared Utilities
-// ================================================================
-
 function formatPrice(price) {
     return "Rp " + Number(price).toLocaleString("id-ID");
 }
