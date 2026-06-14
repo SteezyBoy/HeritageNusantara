@@ -1,6 +1,6 @@
 async function loadMenuFromSheet() {
     const url = getAppsScriptUrl();
-    if (!url || url === "PASTE_YOUR_APPS_SCRIPT_URL_HERE") {
+    if (!url || url === "https://script.google.com/macros/s/AKfycbzuAkoRqw2XZKLLPs48QaONg1PWkpeN9ZkFnnFwKD1BrknSc9bgzr3hKo_RV_5Mx09fAQ/execE") {
         console.warn("Apps Script URL not set, using default menu");
         setDefaultMenu();
         return;
@@ -10,10 +10,15 @@ async function loadMenuFromSheet() {
         if (data.menu && data.menu.length) {
             const newMenu = { makanan: [], minuman: [], dessert: [] };
             data.menu.forEach(item => {
+                const cat = (item.category || "").toLowerCase().trim();
                 let categoryKey = "makanan";
-                if (item.category === "minuman") categoryKey = "minuman";
-                else if (item.category === "dessert") categoryKey = "dessert";
-                else categoryKey = "makanan";
+                if (cat === "minuman" || cat === "beverage" || cat === "drink" || cat === "drinks") {
+                    categoryKey = "minuman";
+                } else if (cat === "dessert" || cat === "desserts" || cat === "penutup") {
+                    categoryKey = "dessert";
+                } else {
+                    categoryKey = "makanan";
+                }
                 newMenu[categoryKey].push({
                     name: item.name,
                     category: item.category,
@@ -24,7 +29,12 @@ async function loadMenuFromSheet() {
                     available: item.available !== false
                 });
             });
-            menuData = newMenu;
+            const hasItems = newMenu.makanan.length + newMenu.minuman.length + newMenu.dessert.length;
+            if (hasItems > 0) {
+                menuData = newMenu;
+            } else {
+                setDefaultMenu();
+            }
         } else {
             setDefaultMenu();
         }
@@ -39,7 +49,7 @@ function setDefaultMenu() {
 }
 
 function getFilteredAndSortedItems() {
-    let items = currentCategory === "all" ? getAllItems() : [...menuData[currentCategory]];
+    let items = currentCategory === "all" ? getAllItems() : [...(menuData[currentCategory] || [])];
     items = items.filter(item => item.available !== false);
     if (currentSearchKeyword.trim() !== "") {
         items = items.filter(item => item.name.toLowerCase().includes(currentSearchKeyword.toLowerCase()));
@@ -58,7 +68,11 @@ function renderMenu() {
     if (!menuList) return;
     menuList.innerHTML = "";
     if (items.length === 0) {
-        showEmptyState(currentSearchKeyword || "this category");
+        if (currentSearchKeyword.trim() !== "") {
+            showEmptyState(currentSearchKeyword);
+        } else {
+            showEmptyCategoryState();
+        }
         return;
     }
     items.forEach((item, index) => {
@@ -90,10 +104,20 @@ function showEmptyState(keyword) {
     const menuList = document.getElementById("menu-list");
     menuList.innerHTML = `
     <div class="empty-state">
-        <div class="empty-state-icon">🍽️</div>
-        <h3>No menu found</h3>
-        <p>No results for "<strong>${keyword}</strong>"</p>
+        <div class="empty-state-icon">🔍</div>
+        <h3>Menu tidak ditemukan</h3>
+        <p>Tidak ada hasil untuk "<strong>${keyword}</strong>"</p>
         <button class="empty-state-btn" onclick="clearSearch()">Clear Search</button>
+    </div>`;
+}
+
+function showEmptyCategoryState() {
+    const menuList = document.getElementById("menu-list");
+    menuList.innerHTML = `
+    <div class="empty-state">
+        <div class="empty-state-icon">🍽️</div>
+        <h3>Menu sedang tidak tersedia</h3>
+        <p>Silakan pilih kategori lain atau hubungi staf kami.</p>
     </div>`;
 }
 
