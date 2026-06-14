@@ -1,8 +1,4 @@
-// ================================================================
-// HERITAGE NUSANTARA - User UI Helpers
-// ================================================================
-
-function showSuccessPopup(message = "Successfully added to cart!") {
+function showSuccessPopup(message = "Added to cart!") {
     const popup = document.getElementById("success-popup");
     const msgElem = popup.querySelector("p");
     if (msgElem) msgElem.textContent = message;
