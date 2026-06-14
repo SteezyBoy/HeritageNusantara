@@ -1,13 +1,22 @@
 async function loadMenuFromSheet() {
     const url = getAppsScriptUrl();
-    if (!url || url === "https://script.google.com/macros/s/AKfycbzuAkoRqw2XZKLLPs48QaONg1PWkpeN9ZkFnnFwKD1BrknSc9bgzr3hKo_RV_5Mx09fAQ/exec") {
+    if (!url || url === "PASTE_YOUR_APPS_SCRIPT_URL_HERE") {
         console.warn("Apps Script URL not set, using default menu");
         setDefaultMenu();
         return;
     }
     try {
-        const data = await fetchMenuFromApi();
-        if (data.menu && data.menu.length) {
+        const res = await fetch(url + "?action=getMenu");
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch(parseErr) {
+            console.error("API response bukan JSON valid, pakai default menu. Response:", text.substring(0, 200));
+            setDefaultMenu();
+            return;
+        }
+        if (data && data.menu && Array.isArray(data.menu) && data.menu.length > 0) {
             const newMenu = { makanan: [], minuman: [], dessert: [] };
             data.menu.forEach(item => {
                 const cat = (item.category || "").toLowerCase().trim();
@@ -16,36 +25,43 @@ async function loadMenuFromSheet() {
                     categoryKey = "minuman";
                 } else if (cat === "dessert" || cat === "desserts" || cat === "penutup") {
                     categoryKey = "dessert";
-                } else {
-                    categoryKey = "makanan";
                 }
                 newMenu[categoryKey].push({
                     name: item.name,
                     category: item.category,
                     bestSeller: item.bestSeller === true,
                     image: item.image,
-                    desc: item.desc,
-                    price: Number(item.price),
+                    desc: item.desc || "",
+                    price: Number(item.price) || 0,
                     available: item.available !== false
                 });
             });
-            const hasItems = newMenu.makanan.length + newMenu.minuman.length + newMenu.dessert.length;
-            if (hasItems > 0) {
+            const totalItems = newMenu.makanan.length + newMenu.minuman.length + newMenu.dessert.length;
+            if (totalItems > 0) {
                 menuData = newMenu;
+                console.log("Menu loaded from API:", totalItems, "items");
             } else {
+                console.warn("API menu ada tapi 0 item valid, pakai default");
                 setDefaultMenu();
             }
         } else {
+            console.warn("API menu kosong atau tidak valid, pakai default. data:", JSON.stringify(data).substring(0,100));
             setDefaultMenu();
         }
     } catch (err) {
-        console.error("Failed to load menu from Sheets, using default:", err);
+        console.error("Gagal fetch menu dari API, pakai default:", err);
         setDefaultMenu();
     }
 }
 
 function setDefaultMenu() {
-    menuData = cloneDefaultMenu();
+    if (typeof DEFAULT_MENU_DATA !== "undefined") {
+        menuData = JSON.parse(JSON.stringify(DEFAULT_MENU_DATA));
+        console.log("Default menu loaded:", menuData.makanan.length + menuData.minuman.length + menuData.dessert.length, "items");
+    } else {
+        console.error("DEFAULT_MENU_DATA tidak tersedia!");
+        menuData = { makanan: [], minuman: [], dessert: [] };
+    }
 }
 
 function getFilteredAndSortedItems() {
