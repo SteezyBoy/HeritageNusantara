@@ -19,10 +19,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         tableDisplay.style.display = tableNumber ? "block" : "none";
     }
     loadCartFromLocal();
+
+    // Tampilkan default menu dulu agar tidak kosong
     setDefaultMenu();
+    renderMenu();
+
+    // Lalu coba load dari API (jika berhasil, menu akan di-refresh)
     showSkeletonLoading();
     await loadMenuFromSheet();
     renderMenu();
+
     if (activeOrderId) {
         await resumeActiveOrderIfNeeded();
     } else {
