@@ -18,17 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         tableDisplay.textContent = tableNumber ? `🪑 Table ${tableNumber}` : "";
         tableDisplay.style.display = tableNumber ? "block" : "none";
     }
-        // === MIGRASI CART GUEST KE MEJA ===
-    const oldCartKey = STORAGE_KEYS.cartPrefix + "guest";
-    const newCartKey = STORAGE_KEYS.cartPrefix + (tableNumber || "guest");
-    if (tableNumber && oldCartKey !== newCartKey) {
-        const guestCart = localStorage.getItem(oldCartKey);
-        if (guestCart && !localStorage.getItem(newCartKey)) {
-            localStorage.setItem(newCartKey, guestCart);
-            localStorage.removeItem(oldCartKey);
-            console.log("Cart migrated from guest to table", tableNumber);
-        }
-    }
+    
     loadCartFromLocal();
 
     // Tampilkan default menu dulu agar tidak kosong
