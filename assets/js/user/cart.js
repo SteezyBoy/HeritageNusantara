@@ -1,10 +1,4 @@
-// ================================================================
-// HERITAGE NUSANTARA - User Cart
-// Notes berbeda = entri terpisah (tidak digabung)
-// ================================================================
-
 function addItemToCart(item, qty, notes) {
-    // Entri terpisah jika notes berbeda (atau semua selalu terpisah jika notes ada)
     const normalizedNotes = (notes || "").trim();
     const existing = cart.find(c => c.name === item.name && (c.notes || "") === normalizedNotes);
     if (existing) {
@@ -12,6 +6,7 @@ function addItemToCart(item, qty, notes) {
     } else {
         cart.push({ ...item, quantity: qty, notes: normalizedNotes });
     }
+    saveCartToLocal();
     updateCartBadge();
     animateCartIcon();
 }
@@ -72,11 +67,13 @@ function updateCart() {
 function changeCartQty(index, amount) {
     cart[index].quantity += amount;
     if (cart[index].quantity <= 0) cart.splice(index, 1);
+    saveCartToLocal();
     updateCart();
 }
 
 function removeCartItem(index) {
     cart.splice(index, 1);
+    saveCartToLocal();
     updateCart();
 }
 
@@ -84,6 +81,7 @@ function clearCart() {
     if (cart.length === 0) return;
     if (confirm("Clear all items from cart?")) {
         cart = [];
+        saveCartToLocal();
         updateCart();
     }
 }
@@ -95,7 +93,8 @@ function openCart() {
     document.getElementById("order-summary-screen").style.display = "none";
     document.getElementById("payment-screen").style.display       = "none";
     document.getElementById("cashier-wait-screen").style.display  = "none";
-    document.getElementById("bill-monitor-screen").style.display  = "none";
+    document.getElementById("order-status-screen").style.display  = "none";
+    document.getElementById("review-payment-screen").style.display = "none";
 }
 
 function closeCart() {
@@ -116,10 +115,7 @@ function proceedOrder() {
 }
 
 function openOrderSummary() {
-    if (cart.length === 0) {
-        showShareToast("🛒 Your cart is empty!");
-        return;
-    }
+    if (cart.length === 0) { showShareToast("🛒 Your cart is empty!"); return; }
     const summaryContainer = document.getElementById("order-summary-items");
     summaryContainer.innerHTML = "";
     let total = 0;
@@ -136,11 +132,10 @@ function openOrderSummary() {
         </div>`;
     });
     document.getElementById("order-summary-grand-total").innerText = formatPrice(total);
-    // Tampilkan nomor meja di review
     const tableEl = document.getElementById("summary-table-display");
-    if (tableEl) tableEl.innerHTML = `🪑 Meja: <strong>${tableNumber || "—"}</strong>`;
+    if (tableEl) tableEl.innerHTML = `🪑 Table: <strong>${tableNumber || "—"}</strong>`;
     const now = new Date();
-    const timeStr = now.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+    const timeStr = now.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
     document.getElementById("order-time-display").innerHTML = `🕐 Order Time: ${timeStr}`;
     document.getElementById("cart-screen").style.display          = "none";
     document.getElementById("order-summary-screen").style.display = "block";
