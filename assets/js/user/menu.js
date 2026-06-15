@@ -1,6 +1,7 @@
 async function loadMenuFromSheet() {
     const url = getAppsScriptUrl();
-    if (!url || url === "PASTE_YOUR_APPS_SCRIPT_URL_HERE" || url === "https://script.google.com/macros/s/AKfycbzuAkoRqw2XZKLLPs48QaONg1PWkpeN9ZkFnnFwKD1BrknSc9bgzr3hKo_RV_5Mx09fAQ/exec") {
+    if (!url || url === "https://script.google.com/macros/s/AKfycbwLImGvV2tSaZAoOYikatDMOxXpfIXlGpeGX_bOKy64MmPEF_Ao8PITSOtC-_5zwrg2cA/exec
+") {
         console.warn("Apps Script URL not set or using fallback, keeping default menu");
         // Tidak perlu setDefaultMenu lagi karena sudah ada dari init
         return;
