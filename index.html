@@ -88,7 +88,6 @@
     </footer>
 </div>
 
-<!-- MODAL DETAIL -->
 <div id="modal" class="modal">
     <div class="modal-container">
         <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -116,12 +115,10 @@
     </div>
 </div>
 
-<!-- CART / ORDER MODAL -->
 <div id="cartModal" class="cart-modal">
     <div class="cart-content">
         <span class="close" onclick="closeCart()">×</span>
 
-        <!-- Cart Screen -->
         <div id="cart-screen">
             <h2>🛒 Your Cart</h2>
             <div id="cart-items"></div>
@@ -134,12 +131,11 @@
                 <div class="cart-total">Total: <span id="cart-total">Rp 0</span></div>
                 <div class="cart-actions-row">
                     <button class="clear-cart-btn" onclick="clearCart()">🗑 Clear All</button>
-                    <button class="checkout-btn" onclick="proceedOrder()">Proceed Order</button>
+                    <button class="checkout-btn" onclick="proceedOrder(event)" ontouchstart="proceedOrder(event)">Proceed Order</button>
                 </div>
             </div>
         </div>
 
-        <!-- Order Review -->
         <div id="order-summary-screen" style="display:none;">
             <h2>📋 Review Order</h2>
             <div id="summary-table-display" class="summary-table-info"></div>
@@ -151,11 +147,10 @@
             <div class="order-timestamp"><span id="order-time-display"></span></div>
             <div class="summary-btn-row">
                 <button class="back-btn" onclick="backToCart()">← Back</button>
-                <button class="checkout-btn send-order-btn" onclick="sendOrderAndMonitor()">✅ Send Order</button>
+                <button class="checkout-btn send-order-btn" onclick="sendOrderAndMonitor(event)" ontouchstart="sendOrderAndMonitor(event)">✅ Send Order</button>
             </div>
         </div>
 
-        <!-- Order Status Screen -->
         <div id="order-status-screen" style="display:none;">
             <h2>📊 Order Status</h2>
             <div id="status-order-id" style="font-size:12px;text-align:center;color:var(--muted);margin-bottom:10px;"></div>
@@ -169,8 +164,6 @@
                 <button id="statusPayBtn" class="checkout-btn" style="display:none;" onclick="showPaymentOptions()">💳 Pay Now</button>
             </div>
         </div>
-
-        <!-- QRIS Payment Screen -->
         <div id="payment-screen" style="display:none;">
             <h2>💳 QRIS Payment</h2>
             <div class="payment-info-box">
@@ -188,8 +181,6 @@
             <button class="checkout-btn" style="background:#64748b;margin-top:12px;" onclick="backToOrderStatus()">← Back</button>
             <button class="checkout-btn" style="background:linear-gradient(135deg,var(--green),var(--green2));margin-top:12px;" onclick="finalizeQrisPayment()">✅ Confirm & Close Bill</button>
         </div>
-
-        <!-- Cashier Wait Screen -->
         <div id="cashier-wait-screen" style="display:none;">
             <h2>💰 Pay at Cashier</h2>
             <div class="payment-info-box">
@@ -201,8 +192,6 @@
             <p class="qris-note">Please make payment at the cashier. This page will auto-close once cashier confirms payment.</p>
             <button class="checkout-btn" style="background:#64748b;margin-top:12px;" onclick="closeCashierWaitScreen()">Close (still waiting)</button>
         </div>
-
-        <!-- Review Before Payment Modal (inside cart) -->
         <div id="review-payment-screen" style="display:none;">
             <h2>💰 Review All Orders</h2>
             <div id="reviewPaymentItems"></div>
@@ -218,7 +207,6 @@
     </div>
 </div>
 
-<!-- Payment Choice Modal -->
 <div id="paymentChoiceModal" class="payment-choice-modal">
     <div class="payment-choice-content">
         <h3>💳 Select Payment Method</h3>
