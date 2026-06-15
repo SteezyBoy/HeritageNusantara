@@ -1,4 +1,4 @@
-const APPS_SCRIPT_FALLBACK_URL = "https://script.google.com/macros/s/AKfycbwLImGvV2tSaZAoOYikatDMOxXpfIXlGpeGX_bOKy64MmPEF_Ao8PITSOtC-_5zwrg2cA/exec
+const APPS_SCRIPT_FALLBACK_URL = "https://script.google.com/macros/s/AKfycbwLImGvV2tSaZAoOYikatDMOxXpfIXlGpeGX_bOKy64MmPEF_Ao8PITSOtC-_5zwrg2cA/exec";
 ";
 
 const STORAGE_KEYS = {
