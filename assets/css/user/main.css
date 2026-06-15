@@ -881,3 +881,11 @@ footer h3 { color: var(--accent); margin-bottom: 8px; }
     85%  { transform: scale(1.07); }
     100% { transform: scale(1); }
 }
+
+/* Memastikan tombol bisa disentuh di HP */
+.checkout-btn, .send-order-btn {
+    cursor: pointer;
+    touch-action: manipulation; /* Optimasi klik untuk HP */
+    -webkit-tap-highlight-color: transparent;
+    z-index: 1000;
+}
