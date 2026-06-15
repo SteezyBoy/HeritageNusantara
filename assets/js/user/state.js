@@ -1,24 +1,10 @@
-// ==========================================
-// FILE: assets/js/user/state.js
-// ==========================================
+// Ganti baris ini:
+// let activeOrder = JSON.parse(localStorage.getItem('heritage_activeOrder')) || null;
 
-// 1. Inisialisasi Data dari localStorage (atau default jika kosong)
-let cart = JSON.parse(localStorage.getItem('heritage_cart')) || [];
-let activeOrder = JSON.parse(localStorage.getItem('heritage_activeOrder')) || null;
+// Menjadi ini:
+let activeOrders = JSON.parse(localStorage.getItem('heritage_activeOrders')) || [];
 
-// 2. Fungsi Sinkronisasi (Save)
-function syncCartState() {
-    localStorage.setItem('heritage_cart', JSON.stringify(cart));
-}
-
+// Dan perbarui fungsi sinkronisasi:
 function syncOrderState() {
-    localStorage.setItem('heritage_activeOrder', JSON.stringify(activeOrder));
-}
-
-// 3. Fungsi Pembersih (Setelah pembayaran sukses)
-function clearUserSession() {
-    localStorage.removeItem('heritage_cart');
-    localStorage.removeItem('heritage_activeOrder');
-    cart = [];
-    activeOrder = null;
+    localStorage.setItem('heritage_activeOrders', JSON.stringify(activeOrders));
 }
