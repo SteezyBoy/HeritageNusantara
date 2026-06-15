@@ -1,156 +1,156 @@
-function addItemToCart(item, qty, notes) {
-    const normalizedNotes = (notes || "").trim();
-    const existing = cart.find(c => c.name === item.name && (c.notes || "") === normalizedNotes);
-    if (existing) {
-        existing.quantity += qty;
-    } else {
-        cart.push({ ...item, quantity: qty, notes: normalizedNotes });
-    }
-    saveCartToLocal();
-    updateCartBadge();
-    animateCartIcon();
-}
-
-function updateCartBadge() {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const badge = document.getElementById("cart-count");
-    if (badge) badge.innerText = totalItems;
-}
-
-function animateCartIcon() {
-    const btn = document.getElementById("cartIconBtn");
-    if (!btn) return;
-    btn.classList.remove("cart-pop");
-    void btn.offsetWidth;
-    btn.classList.add("cart-pop");
-    setTimeout(() => btn.classList.remove("cart-pop"), 500);
-}
-
-function updateCart() {
-    updateCartBadge();
-    const container  = document.getElementById("cart-items");
-    const emptyState = document.getElementById("cart-empty-state");
-    if (!container) return;
-    container.innerHTML = "";
-    if (cart.length === 0) {
-        if (emptyState) emptyState.style.display = "block";
-        container.style.display = "none";
-        const totalSpan = document.getElementById("cart-total");
-        if (totalSpan) totalSpan.innerText = formatPrice(0);
+async function loadMenuFromSheet() {
+    const url = getAppsScriptUrl();
+    if (!url || url === "PASTE_YOUR_APPS_SCRIPT_URL_HERE" || url === "https://script.google.com/macros/s/AKfycbzuAkoRqw2XZKLLPs48QaONg1PWkpeN9ZkFnnFwKD1BrknSc9bgzr3hKo_RV_5Mx09fAQ/exec") {
+        console.warn("Apps Script URL not set, will use default menu fallback");
         return;
     }
-    if (emptyState) emptyState.style.display = "none";
-    container.style.display = "block";
-    let total = 0;
-    cart.forEach((item, index) => {
-        total += item.price * item.quantity;
-        const div = document.createElement("div");
-        div.className = "cart-item";
-        div.innerHTML = `
-        <div class="cart-item-info">
-            <strong>${item.name}</strong>
-            <div class="cart-item-price">${formatPrice(item.price * item.quantity)}</div>
-            ${item.notes ? `<span class="cart-notes">📝 ${item.notes}</span>` : ''}
-        </div>
-        <div class="cart-item-controls">
-            <button class="btn-qty" onclick="changeCartQty(${index}, -1)">-</button>
-            <span>${item.quantity}</span>
-            <button class="btn-qty" onclick="changeCartQty(${index}, 1)">+</button>
-            <button class="btn-remove" onclick="removeCartItem(${index})">🗑️</button>
-        </div>`;
-        container.appendChild(div);
-    });
-    const totalSpan = document.getElementById("cart-total");
-    if (totalSpan) totalSpan.innerText = formatPrice(total);
-}
+    try {
+        const res = await fetch(url + "?action=getMenu");
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch(parseErr) {
+            console.error("API response bukan JSON valid");
+            return; 
+        }
+        if (data && data.menu && Array.isArray(data.menu) && data.menu.length > 0) {
+            const newMenu = { makanan: [], minuman: [], dessert: [] };
+            data.menu.forEach(item => {
+                const cat = (item.category || "").toLowerCase().trim();
+                let categoryKey = "makanan";
+                if (cat === "minuman" || cat.includes("beverage") || cat.includes("drink")) {
+                    categoryKey = "minuman";
+                } else if (cat === "dessert" || cat.includes("penutup")) {
+                    categoryKey = "dessert";
+                }
+                
+                // Bypass masalah "Rp" atau salah ketik harga di Spreadsheet yang bikin menu hilang
+                const rawPrice = String(item.price || "0").replace(/[^0-9]/g, '');
+                const finalPrice = Number(rawPrice) || 0;
 
-function changeCartQty(index, amount) {
-    cart[index].quantity += amount;
-    if (cart[index].quantity <= 0) cart.splice(index, 1);
-    saveCartToLocal();
-    updateCart();
-}
-
-function removeCartItem(index) {
-    cart.splice(index, 1);
-    saveCartToLocal();
-    updateCart();
-}
-
-function clearCart() {
-    if (cart.length === 0) return;
-    if (confirm("Clear all items from cart?")) {
-        cart = [];
-        saveCartToLocal();
-        updateCart();
+                // Selama ada nama makanannya, langsung loloskan
+                if (item.name && item.name.trim() !== "") {
+                    newMenu[categoryKey].push({
+                        name: item.name.trim(),
+                        category: item.category || categoryKey,
+                        bestSeller: item.bestSeller === true || String(item.bestSeller).toLowerCase() === "true",
+                        image: item.image || "",
+                        desc: item.desc || "",
+                        price: finalPrice,
+                        available: item.available !== false && String(item.available).toLowerCase() !== "false"
+                    });
+                }
+            });
+            const totalItems = newMenu.makanan.length + newMenu.minuman.length + newMenu.dessert.length;
+            if (totalItems > 0) {
+                menuData = newMenu;
+                console.log("Menu loaded from API:", totalItems, "items");
+                renderMenu(); 
+            }
+        }
+    } catch (err) {
+        console.error("Gagal fetch menu dari API:", err);
     }
 }
 
-function openCart() {
-    updateCart();
-    document.getElementById("cartModal").style.display    = "block";
-    document.getElementById("cart-screen").style.display  = "block";
-    document.getElementById("order-summary-screen").style.display = "none";
-    document.getElementById("payment-screen").style.display       = "none";
-    document.getElementById("cashier-wait-screen").style.display  = "none";
-    document.getElementById("order-status-screen").style.display  = "none";
-    document.getElementById("review-payment-screen").style.display = "none";
+function setDefaultMenu() {
+    if (typeof DEFAULT_MENU_DATA !== "undefined" && DEFAULT_MENU_DATA) {
+        menuData = JSON.parse(JSON.stringify(DEFAULT_MENU_DATA));
+        console.log("Default menu loaded:", menuData.makanan.length + menuData.minuman.length + menuData.dessert.length, "items");
+    } else {
+        console.error("DEFAULT_MENU_DATA tidak tersedia!");
+        menuData = { makanan: [], minuman: [], dessert: [] };
+    }
 }
 
-function closeCart() {
-    document.getElementById("cartModal").style.display = "none";
+function getFilteredAndSortedItems() {
+    let items = currentCategory === "all" ? getAllItems() : [...(menuData[currentCategory] || [])];
+    items = items.filter(item => item.available !== false);
+    if (currentSearchKeyword.trim() !== "") {
+        items = items.filter(item => item.name.toLowerCase().includes(currentSearchKeyword.toLowerCase()));
+    }
+    const sortValue = document.getElementById("sortMenu")?.value;
+    if (sortValue === "az") items.sort((a, b) => a.name.localeCompare(b.name));
+    else if (sortValue === "za") items.sort((a, b) => b.name.localeCompare(a.name));
+    else if (sortValue === "low") items.sort((a, b) => a.price - b.price);
+    else if (sortValue === "high") items.sort((a, b) => b.price - a.price);
+    return items;
 }
 
-function backToCart() {
-    document.getElementById("order-summary-screen").style.display = "none";
-    document.getElementById("cart-screen").style.display = "block";
-}
-
-function proceedOrder() {
-    if (cart.length === 0) {
-        if (typeof showShareToast === "function") {
-            showShareToast("🛒 Your cart is empty!");
+function renderMenu() {
+    const items = getFilteredAndSortedItems();
+    const menuList = document.getElementById("menu-list");
+    if (!menuList) return;
+    menuList.innerHTML = "";
+    if (items.length === 0) {
+        if (currentSearchKeyword.trim() !== "") {
+            showEmptyState(currentSearchKeyword);
         } else {
-            alert("🛒 Your cart is empty!");
+            showEmptyCategoryState();
         }
         return;
     }
-    openOrderSummary();
+    items.forEach((item, index) => {
+        const safeName = item.name.replace(/'/g, "\\'");
+        const card = document.createElement("div");
+        card.className = "menu-card";
+        card.style.animationDelay = `${index * 0.06}s`;
+        card.innerHTML = `
+            <div class="image-wrapper">
+                ${item.bestSeller ? `<div class="best-seller">🔥 BEST SELLER</div>` : ''}
+                <img src="${item.image}" alt="${item.name}" loading="lazy" class="menu-img"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22240%22><rect fill=%22%23f1f5f9%22 width=%22400%22 height=%22240%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>🍽️</text></svg>'">
+            </div>
+            <div class="menu-info">
+                <div class="food-tag">${item.category}</div>
+                <h3>${item.name}</h3>
+                <div class="price">${formatPrice(item.price)}</div>
+                <p>${item.desc.substring(0, 80)}${item.desc.length > 80 ? '...' : ''}</p>
+                <div class="card-actions">
+                    <button class="detail-btn" onclick="openModalByName('${safeName}')">View Details</button>
+                    ${item.available !== false ? `<button class="add-to-cart-btn" onclick="openQuickAddPopup('${safeName}')">+ Add To Cart</button>` : '<button class="add-to-cart-btn" style="background:#64748b;cursor:not-allowed;" disabled>❌ Out of Stock</button>'}
+                </div>
+            </div>`;
+        menuList.appendChild(card);
+    });
 }
 
-function openOrderSummary() {
-    if (cart.length === 0) { 
-        if (typeof showShareToast === "function") showShareToast("🛒 Your cart is empty!");
-        return; 
-    }
-    const summaryContainer = document.getElementById("order-summary-items");
-    if (!summaryContainer) return;
-    summaryContainer.innerHTML = "";
-    let total = 0;
-    cart.forEach(item => {
-        total += item.price * item.quantity;
-        summaryContainer.innerHTML += `
-        <div class="summary-item">
-            <div class="summary-item-left">
-                <span class="summary-item-qty">${item.quantity}×</span>
-                <span class="summary-item-name">${item.name}</span>
-                ${item.notes ? `<span class="summary-item-note">📝 ${item.notes}</span>` : ''}
-            </div>
-            <span class="summary-item-price">${formatPrice(item.price * item.quantity)}</span>
-        </div>`;
-    });
-    
-    const grandTotalEl = document.getElementById("order-summary-grand-total");
-    if (grandTotalEl) grandTotalEl.innerText = formatPrice(total);
-    
-    const tableEl = document.getElementById("summary-table-display");
-    if (tableEl) tableEl.innerHTML = `🪑 Table: <strong>${typeof tableNumber !== "undefined" ? (tableNumber || "—") : "—"}</strong>`;
-    
-    const now = new Date();
-    const timeStr = now.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
-    const timeDispEl = document.getElementById("order-time-display");
-    if (timeDispEl) timeDispEl.innerHTML = `🕐 Order Time: ${timeStr}`;
-    
-    document.getElementById("cart-screen").style.display          = "none";
-    document.getElementById("order-summary-screen").style.display = "block";
+function showEmptyState(keyword) {
+    const menuList = document.getElementById("menu-list");
+    menuList.innerHTML = `
+    <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h3>Menu tidak ditemukan</h3>
+        <p>Tidak ada hasil untuk "<strong>${keyword}</strong>"</p>
+        <button class="empty-state-btn" onclick="clearSearch()">Clear Search</button>
+    </div>`;
+}
+
+function showEmptyCategoryState() {
+    const menuList = document.getElementById("menu-list");
+    menuList.innerHTML = `
+    <div class="empty-state">
+        <div class="empty-state-icon">🍽️</div>
+        <h3>Menu sedang tidak tersedia</h3>
+        <p>Silakan pilih kategori lain atau hubungi staf kami.</p>
+    </div>`;
+}
+
+function clearSearch() {
+    document.getElementById("searchInput").value = "";
+    currentSearchKeyword = "";
+    renderMenu();
+}
+
+function searchMenu() { currentSearchKeyword = document.getElementById("searchInput").value; renderMenu(); }
+function sortMenu() { renderMenu(); }
+function changeCategory(btn, category) {
+    document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentCategory = category;
+    currentSearchKeyword = "";
+    document.getElementById("searchInput").value = "";
+    if (typeof showSkeletonLoading === "function") showSkeletonLoading();
+    setTimeout(() => renderMenu(), 300);
 }
