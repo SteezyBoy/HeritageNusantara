@@ -106,14 +106,14 @@ function backToCart() {
     document.getElementById("cart-screen").style.display = "block";
 }
 
-function proceedOrder() {
+function proceedOrder(event) {
+    if (event) event.stopPropagation(); // Penting untuk HP
     if (cart.length === 0) {
         showShareToast("🛒 Your cart is empty!");
         return;
     }
     openOrderSummary();
 }
-
 function openOrderSummary() {
     if (cart.length === 0) { showShareToast("🛒 Your cart is empty!"); return; }
     const summaryContainer = document.getElementById("order-summary-items");
