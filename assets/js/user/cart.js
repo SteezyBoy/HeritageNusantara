@@ -1,6 +1,7 @@
 async function loadMenuFromSheet() {
     const url = getAppsScriptUrl();
-    if (!url || url === "PASTE_YOUR_APPS_SCRIPT_URL_HERE" || url === "https://script.google.com/macros/s/AKfycbzuAkoRqw2XZKLLPs48QaONg1PWkpeN9ZkFnnFwKD1BrknSc9bgzr3hKo_RV_5Mx09fAQ/exec") {
+    if (!url || url === "https://script.google.com/macros/s/AKfycbzsgvy9iwKfdW4PSY3lKHs1xNAsOTTZYL7NHTfdOI1YBJqi9O_9gzXPaluzJoxK7BYK/exec
+") {
         console.warn("Apps Script URL not set, will use default menu fallback");
         return;
     }
