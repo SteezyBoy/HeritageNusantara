@@ -1,83 +1,24 @@
-let currentCategory      = "all";
-let currentItem          = null;
-let cart                 = [];
-let currentSearchKeyword = "";
-let quickAddItem         = null;
-let quickQty             = 1;
-let isDarkMode           = localStorage.getItem(STORAGE_KEYS.darkMode) === "true";
-let menuData             = { makanan: [], minuman: [], dessert: [] };
-let activeOrderId        = localStorage.getItem(STORAGE_KEYS.activeOrderId) || null;
-let tableNumber          = "";
-let monitorInterval      = null;
-let cashierPollInterval  = null;
+// ==========================================
+// FILE: assets/js/user/state.js
+// ==========================================
 
-function getCartKey() {
-    return STORAGE_KEYS.cartPrefix + (tableNumber || "guest");
+// 1. Inisialisasi Data dari localStorage (atau default jika kosong)
+let cart = JSON.parse(localStorage.getItem('heritage_cart')) || [];
+let activeOrder = JSON.parse(localStorage.getItem('heritage_activeOrder')) || null;
+
+// 2. Fungsi Sinkronisasi (Save)
+function syncCartState() {
+    localStorage.setItem('heritage_cart', JSON.stringify(cart));
 }
 
-function saveCartToLocal() {
-    localStorage.setItem(getCartKey(), JSON.stringify(cart));
-
-    localStorage.setItem(
-        "hn_order_draft",
-        JSON.stringify({
-            cart,
-            activeOrderId,
-            tableNumber
-        })
-    );
+function syncOrderState() {
+    localStorage.setItem('heritage_activeOrder', JSON.stringify(activeOrder));
 }
 
-function loadCartFromLocal() {
-
-    const saved = localStorage.getItem(getCartKey());
-
-    if (saved) {
-
-        try {
-
-            cart = JSON.parse(saved);
-
-        } catch(e) {
-
-            console.error(e);
-
-            cart = [];
-
-        }
-
-    }
-
-    const draft =
-        localStorage.getItem("hn_order_draft");
-
-    if (draft) {
-
-        try {
-
-            const data =
-                JSON.parse(draft);
-
-            if (
-                data.cart &&
-                Array.isArray(data.cart)
-            ) {
-                cart = data.cart;
-            }
-
-            if (
-                data.activeOrderId
-            ) {
-                activeOrderId =
-                    data.activeOrderId;
-            }
-
-        } catch(err) {
-
-            console.error(err);
-
-        }
-    }
-
-    updateCartBadge();
+// 3. Fungsi Pembersih (Setelah pembayaran sukses)
+function clearUserSession() {
+    localStorage.removeItem('heritage_cart');
+    localStorage.removeItem('heritage_activeOrder');
+    cart = [];
+    activeOrder = null;
 }
