@@ -108,15 +108,23 @@ function backToCart() {
 
 function proceedOrder() {
     if (cart.length === 0) {
-        showShareToast("🛒 Your cart is empty!");
+        if (typeof showShareToast === "function") {
+            showShareToast("🛒 Your cart is empty!");
+        } else {
+            alert("🛒 Your cart is empty!");
+        }
         return;
     }
     openOrderSummary();
 }
 
 function openOrderSummary() {
-    if (cart.length === 0) { showShareToast("🛒 Your cart is empty!"); return; }
+    if (cart.length === 0) { 
+        if (typeof showShareToast === "function") showShareToast("🛒 Your cart is empty!");
+        return; 
+    }
     const summaryContainer = document.getElementById("order-summary-items");
+    if (!summaryContainer) return;
     summaryContainer.innerHTML = "";
     let total = 0;
     cart.forEach(item => {
@@ -131,12 +139,18 @@ function openOrderSummary() {
             <span class="summary-item-price">${formatPrice(item.price * item.quantity)}</span>
         </div>`;
     });
-    document.getElementById("order-summary-grand-total").innerText = formatPrice(total);
+    
+    const grandTotalEl = document.getElementById("order-summary-grand-total");
+    if (grandTotalEl) grandTotalEl.innerText = formatPrice(total);
+    
     const tableEl = document.getElementById("summary-table-display");
-    if (tableEl) tableEl.innerHTML = `🪑 Table: <strong>${tableNumber || "—"}</strong>`;
+    if (tableEl) tableEl.innerHTML = `🪑 Table: <strong>${typeof tableNumber !== "undefined" ? (tableNumber || "—") : "—"}</strong>`;
+    
     const now = new Date();
     const timeStr = now.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
-    document.getElementById("order-time-display").innerHTML = `🕐 Order Time: ${timeStr}`;
+    const timeDispEl = document.getElementById("order-time-display");
+    if (timeDispEl) timeDispEl.innerHTML = `🕐 Order Time: ${timeStr}`;
+    
     document.getElementById("cart-screen").style.display          = "none";
     document.getElementById("order-summary-screen").style.display = "block";
 }
