@@ -1,8 +1,7 @@
 async function loadMenuFromSheet() {
     const url = getAppsScriptUrl();
-    if (!url || url === "PASTE_YOUR_APPS_SCRIPT_URL_HERE" || url === "https://script.google.com/macros/s/AKfycbzuAkoRqw2XZKLLPs48QaONg1PWkpeN9ZkFnnFwKD1BrknSc9bgzr3hKo_RV_5Mx09fAQ/exec") {
-        console.warn("Apps Script URL not set or using fallback, keeping default menu");
-        // Tidak perlu setDefaultMenu lagi karena sudah ada dari init
+    if (!url || url === "https://script.google.com/macros/s/AKfycbzsgvy9iwKfdW4PSY3lKHs1xNAsOTTZYL7NHTfdOI1YBJqi9O_9gzXPaluzJoxK7BYK/exec") {
+        console.warn("Apps Script URL not set, will use default menu fallback");
         return;
     }
     try {
@@ -12,29 +11,34 @@ async function loadMenuFromSheet() {
         try {
             data = JSON.parse(text);
         } catch(parseErr) {
-            console.error("API response bukan JSON valid, tetap pakai default menu. Response:", text.substring(0, 200));
-            return; // Tetap pakai menu yang sudah ada (default)
+            console.error("API response bukan JSON valid");
+            return; 
         }
         if (data && data.menu && Array.isArray(data.menu) && data.menu.length > 0) {
             const newMenu = { makanan: [], minuman: [], dessert: [] };
             data.menu.forEach(item => {
                 const cat = (item.category || "").toLowerCase().trim();
                 let categoryKey = "makanan";
-                if (cat === "minuman" || cat === "beverage" || cat === "drink" || cat === "drinks") {
+                if (cat === "minuman" || cat.includes("beverage") || cat.includes("drink")) {
                     categoryKey = "minuman";
-                } else if (cat === "dessert" || cat === "desserts" || cat === "penutup") {
+                } else if (cat === "dessert" || cat.includes("penutup")) {
                     categoryKey = "dessert";
                 }
-                // Hanya tambahkan jika item valid
-                if (item.name && item.price) {
+                
+                // Bypass masalah "Rp" atau salah ketik harga di Spreadsheet yang bikin menu hilang
+                const rawPrice = String(item.price || "0").replace(/[^0-9]/g, '');
+                const finalPrice = Number(rawPrice) || 0;
+
+                // Selama ada nama makanannya, langsung loloskan
+                if (item.name && item.name.trim() !== "") {
                     newMenu[categoryKey].push({
-                        name: item.name,
+                        name: item.name.trim(),
                         category: item.category || categoryKey,
-                        bestSeller: item.bestSeller === true,
+                        bestSeller: item.bestSeller === true || String(item.bestSeller).toLowerCase() === "true",
                         image: item.image || "",
                         desc: item.desc || "",
-                        price: Number(item.price) || 0,
-                        available: item.available !== false
+                        price: finalPrice,
+                        available: item.available !== false && String(item.available).toLowerCase() !== "false"
                     });
                 }
             });
@@ -42,17 +46,11 @@ async function loadMenuFromSheet() {
             if (totalItems > 0) {
                 menuData = newMenu;
                 console.log("Menu loaded from API:", totalItems, "items");
-                renderMenu(); // Refresh tampilan dengan data API
-            } else {
-                console.warn("API menu kosong, tetap pakai default");
-                // tidak perlu setDefaultMenu, karena sudah ada
+                renderMenu(); 
             }
-        } else {
-            console.warn("API menu tidak valid, tetap pakai default");
         }
     } catch (err) {
-        console.error("Gagal fetch menu dari API, tetap pakai default:", err);
-        // Tidak perlu setDefaultMenu, karena sudah ada
+        console.error("Gagal fetch menu dari API:", err);
     }
 }
 
@@ -153,7 +151,6 @@ function changeCategory(btn, category) {
     currentCategory = category;
     currentSearchKeyword = "";
     document.getElementById("searchInput").value = "";
-    // Tampilkan skeleton loading sebentar lalu render
-    showSkeletonLoading();
+    if (typeof showSkeletonLoading === "function") showSkeletonLoading();
     setTimeout(() => renderMenu(), 300);
 }
