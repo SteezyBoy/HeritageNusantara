@@ -77,3 +77,10 @@ function shareItem() {
         navigator.clipboard.writeText(text).then(() => showShareToast("📋 Copied to clipboard!")).catch(() => {});
     }
 }
+
+// Mencegah klik di dalam konten modal agar tidak bocor ke luar
+document.querySelectorAll('.modal-container, .cart-content, .quick-add-content').forEach(container => {
+    container.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+});
