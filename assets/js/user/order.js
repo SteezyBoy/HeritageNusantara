@@ -1,7 +1,6 @@
-// Saat Anda membuat order baru
-function createOrder(orderData) {
-    activeOrder = orderData;
-    
-    // TAMBAHKAN INI:
-    syncOrderState();
-}
+// JANGAN PAKAI INI LAGI:
+// activeOrder = dataBaru; 
+// syncOrderState();
+
+// GUNAKAN INI (Sesuai fungsi di state.js yang baru):
+addNewOrder(dataBaru);
