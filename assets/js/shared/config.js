@@ -1,4 +1,4 @@
-const APPS_SCRIPT_FALLBACK_URL = "https://script.google.com/macros/s/AKfycbzuAkoRqw2XZKLLPs48QaONg1PWkpeN9ZkFnnFwKD1BrknSc9bgzr3hKo_RV_5Mx09fAQ/exec";
+const APPS_SCRIPT_FALLBACK_URL = "https://script.google.com/macros/s/AKfycbxPSWEJXTocL351zxDKBKjMWBdJv8483nmjQf6q4yg5A_LwYSQl28U9A9iCuKrTbPM61A/exec";
 
 const STORAGE_KEYS = {
     adminUrl:      "hn_admin_url",
