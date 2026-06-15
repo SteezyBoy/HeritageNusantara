@@ -1,83 +1,47 @@
-let currentCategory      = "all";
-let currentItem          = null;
-let cart                 = [];
-let currentSearchKeyword = "";
-let quickAddItem         = null;
-let quickQty             = 1;
-let isDarkMode           = localStorage.getItem(STORAGE_KEYS.darkMode) === "true";
-let menuData             = { makanan: [], minuman: [], dessert: [] };
-let activeOrderId        = localStorage.getItem(STORAGE_KEYS.activeOrderId) || null;
-let tableNumber          = "";
-let monitorInterval      = null;
-let cashierPollInterval  = null;
+// ========================================================
+// FILE: assets/js/user/state.js
+// Mengelola penyimpanan data lokal agar tidak hilang saat refresh
+// ========================================================
 
-function getCartKey() {
-    return STORAGE_KEYS.cartPrefix + (tableNumber || "guest");
+// Menggunakan 'window' agar variabel bisa diakses oleh file lain (cart.js, order.js, dll)
+window.cart = JSON.parse(localStorage.getItem('heritage_cart')) || [];
+window.activeOrders = JSON.parse(localStorage.getItem('heritage_activeOrders')) || [];
+
+/**
+ * Menyimpan data cart ke LocalStorage
+ */
+function syncCart() {
+    localStorage.setItem('heritage_cart', JSON.stringify(window.cart));
 }
 
-function saveCartToLocal() {
-    localStorage.setItem(getCartKey(), JSON.stringify(cart));
-
-    localStorage.setItem(
-        "hn_order_draft",
-        JSON.stringify({
-            cart,
-            activeOrderId,
-            tableNumber
-        })
-    );
+/**
+ * Menyimpan daftar pesanan ke LocalStorage
+ * Menggunakan array agar tidak menimpa pesanan lama
+ */
+function syncOrders() {
+    localStorage.setItem('heritage_activeOrders', JSON.stringify(window.activeOrders));
 }
 
-function loadCartFromLocal() {
+/**
+ * Menambahkan pesanan baru ke daftar tanpa menghapus yang lama
+ */
+function addNewOrder(orderData) {
+    window.activeOrders.push(orderData);
+    syncOrders();
+}
 
-    const saved = localStorage.getItem(getCartKey());
+/**
+ * Membersihkan cart setelah pembayaran sukses
+ */
+function clearCart() {
+    window.cart = [];
+    syncCart();
+}
 
-    if (saved) {
-
-        try {
-
-            cart = JSON.parse(saved);
-
-        } catch(e) {
-
-            console.error(e);
-
-            cart = [];
-
-        }
-
-    }
-
-    const draft =
-        localStorage.getItem("hn_order_draft");
-
-    if (draft) {
-
-        try {
-
-            const data =
-                JSON.parse(draft);
-
-            if (
-                data.cart &&
-                Array.isArray(data.cart)
-            ) {
-                cart = data.cart;
-            }
-
-            if (
-                data.activeOrderId
-            ) {
-                activeOrderId =
-                    data.activeOrderId;
-            }
-
-        } catch(err) {
-
-            console.error(err);
-
-        }
-    }
-
-    updateCartBadge();
+/**
+ * Menghapus pesanan spesifik (Opsional: digunakan jika order sudah selesai/bayar)
+ */
+function removeOrder(orderId) {
+    window.activeOrders = window.activeOrders.filter(o => o.id !== orderId);
+    syncOrders();
 }
