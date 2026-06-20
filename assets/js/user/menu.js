@@ -18,18 +18,35 @@ async function loadMenuFromSheet() {
         if (data && data.menu && Array.isArray(data.menu) && data.menu.length > 0) {
             const newMenu = { makanan: [], minuman: [], dessert: [] };
             data.menu.forEach(item => {
-                const cat = (item.category || "").toLowerCase().trim();
-                let categoryKey = "makanan";
-                if (cat === "minuman" || cat === "beverage" || cat === "drink" || cat === "drinks") {
+                // Field "category" bisa berupa "makanan|Appetizer" (format baru, encoded)
+                // atau cuma "makanan" / "Appetizer" / "Main Course" (data lama).
+                const rawCat = String(item.category || "");
+                const [first, second] = rawCat.split("|").map(s => s.trim());
+                const cat = first.toLowerCase();
+                const displayLabel = second || first; // label yang ditampilkan sebagai tag di kartu menu
+
+                // PERBAIKAN: jangan default ke "makanan" untuk kategori yang tidak dikenal.
+                // Default sebelumnya membuat semua item dengan label kategori asing
+                // (mis. "Appetizer", "Soup", "Main Course" dari data lama) ditumpuk
+                // semua ke "makanan", sehingga tab minuman/dessert jadi kosong
+                // begitu data API selesai dimuat (menu terlihat "hilang").
+                let categoryKey;
+                if (cat === "makanan" || cat === "food") {
+                    categoryKey = "makanan";
+                } else if (cat === "minuman" || cat === "beverage" || cat === "drink" || cat === "drinks") {
                     categoryKey = "minuman";
                 } else if (cat === "dessert" || cat === "desserts" || cat === "penutup") {
                     categoryKey = "dessert";
+                } else {
+                    // Kategori lama/tidak dikenal (Appetizer, Soup, Main Course, dll):
+                    // ini SELALU termasuk kategori "makanan" di data lama project ini.
+                    categoryKey = "makanan";
                 }
                 // Hanya tambahkan jika item valid
                 if (item.name && item.price) {
                     newMenu[categoryKey].push({
                         name: item.name,
-                        category: item.category || categoryKey,
+                        category: displayLabel,
                         bestSeller: item.bestSeller === true,
                         image: item.image || "",
                         desc: item.desc || "",
